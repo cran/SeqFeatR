@@ -1,0 +1,35 @@
+# Export all names
+export(
+  qvalues,
+  assocpointtuple,
+  SeqFeatR_GUI,
+  assocpoint,
+  founderelim,
+  assoctuple,
+  rewritetuple,
+  assocpairfeat,
+  vispairfeat,
+  vispair,
+  assocpair,
+  tartan,
+  orPlot,
+  hlaTree
+)
+
+# Import all packages listed as Imports or Depends
+import(
+  tcltk,
+  tcltk2,
+  Biostrings,
+  plotrix,
+  ape
+)
+
+# Import smaller dependencies
+importFrom(plyr, adply)
+importFrom(phangorn, Ancestors)
+importFrom(phangorn, read.phyDat)
+importFrom(phangorn, pml)
+importFrom(phangorn, ancestral.pars)
+importFrom(qvalue, qvalue)
+importFrom(widgetTools, dropdownList)
