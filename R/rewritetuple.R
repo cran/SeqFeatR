@@ -16,9 +16,9 @@ rsm_wo_set_input_file_epi_results <- structure(function(
 
 rewritetuple <- structure(function(#Rewrite shared mutations result
 	### This is a function to put the raw data from the shared mutations program into an usable form for tartan plot
-	input_file = NULL,
+	path_to_file_assoctuple_csv_result = NULL,
 	### the result file from get_shared_mutations
-	save_name,
+	save_name_csv,
 	### the name of the result file from this program
 	first_position, 
 	### the column position of the first sequence position
@@ -26,12 +26,12 @@ rewritetuple <- structure(function(#Rewrite shared mutations result
 	### the column position of the second sequence position
 	value_position, 
 	### the column position of the p-value
-	sep, 
+	separator, 
 	### the seperator of the input file
-	cutoff
+	threshold
 	### the cutoff below which p-value the data should be included in the result
 ){
-	rewrite_shared_mutations_result_inner(input_file, save_name, first_position, second_position, value_position, sep, cutoff)
+	rewrite_shared_mutations_result_inner(path_to_file_assoctuple_csv_result, save_name_csv, first_position, second_position, value_position, separator, threshold)
 },ex=function(){
 	ex <- system.file("extdata", "shared_mutations_result.csv", package="SeqFeatR")
 	rewritetuple(

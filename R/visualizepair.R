@@ -23,19 +23,19 @@ co_g_get_input_file_wo_allel <- structure(function(# Create plot for results fro
 })
 
 #---------------------------------
-vispair <- structure(function(# Create co-mutation plot without allels.
+visualizepair <- structure(function(# Create co-mutation plot without allels.
 	### creates a plot for the results of co-mutation analysis
-	path_to_file = NULL, 
+	path_to_file_assocpair_csv_result = NULL, 
 	### a csv file with results from co mutation without HLA types. For reference please look in example file.
-	save_name, 
+	save_name_pdf, 
 	### the file name of the result file in pdf format
-	thr.sig.fi = 0.01
+	significance_level = 0.01
 	### the significance value below which the results of the co-mutation analysis are considered to be relevant enough to be plotted
 	##details<< A page in an pdf is created with a sequence x sequences graphic. In this graphic every dot (one position with the other position) above the thr.sig.fi is based on it's value marked with a colour. The colour code is on the right side.
 	##seealso<< \code{\link{test_for_comutation_without_allel}}
 	##note<< Only use files generated without allel usage!
 	){
-	test_for_comutation_only_graphics_wo_allels_inner(path_to_file, save_name, thr.sig.fi)
+	test_for_comutation_only_graphics_wo_allels_inner(path_to_file_assocpair_csv_result, save_name_pdf, significance_level)
 	
 },ex=function(){
 	ex <- system.file("extdata", "co_mutation_results_wo_allels.csv", package="SeqFeatR")

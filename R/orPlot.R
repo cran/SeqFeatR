@@ -10,32 +10,36 @@ orPlot <- structure(function(#create two side plot
 	### Generates an sequence bar plot.
 	##details<< This tool took the results from the search for epitopes and combines them in an graphical output where each position in the sequence has its own bar. The heigt of the bar is the log10 of the p-value, the direction is from the odds ratio (below one is down, above one is up). If the user adds a column number for an amino acid or DNA base, this sequence is added above each bar. Further sequences (such as a kind of reference or consensus sequence) besides the one created with find_possible_epiopes have to be added manually to the input *.csv file. If your bar plot should be additionally colored by another type of information - like eg entropy of the sequence - you can add the position of the column with this information in "has_color". If you do not want any color, than just insert 0. The column should contain only numbers between zero and one.
 	##note<< The reference sequence has to be aligned with the sequences used for possible epitope analysis to be shown correctly.
-	input_file = NULL,
+	path_to_file_assocpoint_results = NULL,
 	# the input file with data
-	save_name,
+	save_name_pdf,
 	# the name of the save file. Will be processed further with numbers. See details.
-	seperator = ";",
+	separator = ";",
 	# value with which the csv is seperated.
 	number_of_cases = 2,
 	# the number of different search types like different HLA genes or tropism
-	odds.position = c(6),
+	odds_column_position = c(6),
 	# columnnumber of the odds ratio to determine if up or down. Can be a repeated value as every 4th column
-	p.value.position = c(2),
+	p_value_column_position = c(2),
 	# columnnumber of the p-value to determine the height. Can be a repeated value as every 4th column
-	name = c(2),
+	name_column_position = c(2),
 	# the name for the right lable
 	freq = 7,
 	# frequency of repeat in columns with more than two cases
-	aminoacid.position = NULL,
+	sequence_column_position = NULL,
 	# columnnumber of the amino acid sequence to show above the seq. Can be a repeated value as every 4th column
-	high_log_p = 50,
+	max_y_axis = 50,
 	# the estimated guess of the best p-value. Usuall the number behind the e as positiv number
-	intervall = 10,
+	interval = 10,
 	# the intervall on the y axis
-	has_color = 0
+	has_color = 0,
 	# if there shoul be presented another kind of information as color. See details.
+	bias = 5,
+	# bias of colors
+	p_or_od = "P"
+	# if p values or OR should be plotted
 	){
-	result <- create_sequence_graphic_inner(input_file, save_name, seperator, number_of_cases, odds.position, p.value.position, name, freq, aminoacid.position, high_log_p, intervall, has_color)
+	result <- create_sequence_graphic_inner(path_to_file_assocpoint_results, save_name_pdf, separator, number_of_cases, odds_column_position, p_value_column_position, name_column_position, freq, sequence_column_position, max_y_axis, interval, has_color, bias, p_or_od)
 	return (result)
 
 },ex=function(){
@@ -52,11 +56,13 @@ orPlot <- structure(function(#create two side plot
 	NULL,
 	2,
 	0.5,
-	0	
+	0,
+	5,
+	"P"
  )
 })
 
-create_sequence_graphic_inner <- function(input_file, save_name,seperator, number_of_cases, odds.position, p.value.position, name, freq, aminoacid.position, high_log_p, intervall, has_color){
+create_sequence_graphic_inner <- function(input_file, save_name,seperator, number_of_cases, odds.position, p.value.position, name, freq, aminoacid.position, high_log_p, intervall, has_color, bias, por){
 	if (is.null(input_file)==FALSE){
 		two_wo_set_input_file_known_sequences(input_file, seperator)
 	}
@@ -71,14 +77,18 @@ create_sequence_graphic_inner <- function(input_file, save_name,seperator, numbe
 	for (k in 1:number_of_cases){
 		head <- colnames(data)[name+frequency]
 		#print (head)
+		print (odds.position+frequency)
 		odds.ratio <- as.numeric(data[,(odds.position+frequency)])
-		#print (odds.ratio)
 		corrected_p <- as.numeric(data[,(p.value.position+frequency)])
 		AA <- c()
+		colly <- c()
 		if (has_color){
-			ColorRamp <- colorRampPalette(c("green", "yellow", "red"), bias = 1)(300)
-			ColorLevels <- seq(0, 1, length=length(ColorRamp))
-			color <- as.numeric(data[,has_color])
+			color <- -log10(as.numeric(data[,has_color]))
+			ColorRamp <- colorRampPalette(c("green", "blue", "darkblue"), bias = as.numeric(bias))(300)
+			ColorLevels <- seq(0, max(color), length=length(ColorRamp))
+			for (i in 1:length(color)){
+				colly <- c(colly, ColorRamp[which(ColorLevels >= color[i])[1]])
+			}
 		}
 		if (is.null(aminoacid.position)){
 			aminoacid.position <- NA
@@ -89,21 +99,34 @@ create_sequence_graphic_inner <- function(input_file, save_name,seperator, numbe
 		}
 		height <- c()
 		namese <- c()
-		for (i in 1:length(odds.ratio)){
-			if (odds.ratio[i] > 1){
-				if (is.na(corrected_p[i])){
-					height <- c(height, NA)
-				}else{
-					height <- c(height, -log10(corrected_p[i]))
+		if (por == "P"){
+			for (i in 1:length(odds.ratio)){
+				if (odds.ratio[i] > 1){
+					if (is.na(corrected_p[i])){
+						height <- c(height, NA)
+					}else{
+						height <- c(height, -log10(corrected_p[i]))
+					}
+				}
+				else{
+					if (is.na(corrected_p[i])){
+						height <- c(height, NA)
+					}else{
+						height <- c(height, log10(corrected_p[i]))
+					}
 				}
 			}
-			else{
-				if (is.na(corrected_p[i])){
-					height <- c(height, NA)
+			ylab_lable <- "log10 (p-value)"
+		}
+		if (por == "OR"){
+			for (i in 1:length(odds.ratio)){
+				if (is.infinite(odds.ratio[i])){
+					height <- c(height, log10(max(odds.ratio[is.finite(odds.ratio)]))+1)
 				}else{
-					height <- c(height, log10(corrected_p[i]))
+					height <- c(height, log10(odds.ratio[i]))
 				}
 			}
+			ylab_lable <- "log10 (OR)"
 		}
 		#repeat pdf
 		m <- 1
@@ -123,9 +146,9 @@ create_sequence_graphic_inner <- function(input_file, save_name,seperator, numbe
 				}else if (n > length(height) && m > (length(height)-2)){
 					n <- length(height)
 					if (has_color){
-						barplot(height[m:n], axes = FALSE, xlab="position", ylab="-log (p-value)", width=1, space=0, ylim = c(-high_log_p,high_log_p), col=color.scale(color[m:n],c(1,1,0),c(0,1,1),0))
+						barplot(height[m:n], axes = FALSE, xlab="position", ylab=ylab_lable, width=1, space=0, ylim = c(-high_log_p,high_log_p), col=colly[m:n])
 					}else {
-						barplot(height[m:n], axes = FALSE, xlab="position", ylab="-log (p-value)", width=1, space=0, ylim = c(-high_log_p,high_log_p))
+						barplot(height[m:n], axes = FALSE, xlab="position", ylab=ylab_lable, width=1, space=0, ylim = c(-high_log_p,high_log_p))
 					}
 					#cat (m, n, "\n")
 					axis(1, at=seq(0.5), labels=n) #Position
@@ -145,9 +168,9 @@ create_sequence_graphic_inner <- function(input_file, save_name,seperator, numbe
 					new_end <- n-m+0.5
 
 					if (has_color){
-						barplot(height[m:n], axes = FALSE, xlab="position", ylab="-log (p-value)", width=1, space=0, ylim = c(-high_log_p,high_log_p), col=color.scale(color[m:n],c(1,1,0),c(0,1,1),0))
+						barplot(height[m:n], axes = FALSE, xlab="position", ylab=ylab_lable, width=1, space=0, ylim = c(-high_log_p,high_log_p), col=colly[m:n])
 					}else {
-						barplot(height[m:n], axes = FALSE, xlab="position", ylab="-log (p-value)", width=1, space=0, ylim = c(-high_log_p,high_log_p))
+						barplot(height[m:n], axes = FALSE, xlab="position", ylab=ylab_lable, width=1, space=0, ylim = c(-high_log_p,high_log_p))
 					}
 					#cat (m, n, "\n")
 					#print (seq(m, n))
@@ -168,9 +191,9 @@ create_sequence_graphic_inner <- function(input_file, save_name,seperator, numbe
 
 					### oben R5, unten X4
 					if (has_color){
-						barplot(height[m:n], axes = FALSE, xlab="position", ylab="-log (p-value)", width=1, space=0, ylim = c(-high_log_p,high_log_p), col=color.scale(color[m:n],c(1,1,0),c(0,1,1),0))
+						barplot(height[m:n], axes = FALSE, xlab="position", ylab=ylab_lable, width=1, space=0, ylim = c(-high_log_p,high_log_p), col=colly[m:n])
 					}else {
-						barplot(height[m:n], axes = FALSE, xlab="position", ylab="-log (p-value)", width=1, space=0, ylim = c(-high_log_p,high_log_p))
+						barplot(height[m:n], axes = FALSE, xlab="position", ylab=ylab_lable, width=1, space=0, ylim = c(-high_log_p,high_log_p))
 					}
 					#cat (m, n, "\n")
 					axis(1, at=seq(0.5, 49.5, by=1), labels=seq(m, n)) #Position
@@ -196,15 +219,17 @@ create_sequence_graphic_inner <- function(input_file, save_name,seperator, numbe
 	return (TRUE)
 }
 
-#orPlot("../inst/extdata/epitope_results.csv",
-#"../inst/extdata/gra.pdf",
+#orPlot("Results_for_graphic_env_subtype_C_with_entropy.csv",
+#"../inst/extdata/Results_for_graphic_env_subtype_C_with_entropy.pdf",
 #";",
-#8,
-#6,
-#2,
+#1,
+#7,
+#4,
 #2,
 #7,
-#NULL,
+#6,
 #4,
 #0.5,
-#0)
+#4,
+#2,
+#"OR")

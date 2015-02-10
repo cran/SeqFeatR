@@ -1,16 +1,16 @@
 Package: SeqFeatR
 Type: Package
-Title: Calculates possible epitopes and co-mutations
-Version: 0.1.5
-Date: 2014-06-05
+Title: A Tool to Associate FASTA Sequences and Features
+Version: 0.1.7
+Date: 2015-02-10
 Author: Bettina Budeus
 Maintainer: Bettina Budeus <bettina.budeus@stud.uni-due.de>
-Depends: R(>= 3.1.0),tcltk,tcltk2,Biostrings, plotrix, ape
-Imports: plyr,phangorn,qvalue,widgetTools
+Depends: R(>= 3.1.2),tcltk,tcltk2,Biostrings, plotrix, ape
+Imports: plyr,phangorn,qvalue,widgetTools,calibrate, ggplot2
 Suggests: xtable
-Description: Package includes functions to analyse sequence data in FASTA Format with known HLA types or other features and calculate in the case of HLA as feature possible epitopes from them. Further it calculates possible co-mutations from these sequences and generates graphical output in PDF.
+Description: SeqFeatR provides user friendly methods for the identification of sequence patterns that are statistically significantly associated with a property of the sequence. For instance, SeqFeatR allows to identify viral immune escape mutations for hosts of given HLA types. The underlying statistical method is Fisher's exact test, with appropriate corrections for multiple testing. Patterns may be point mutations or n-tuple of mutations. SeqFeatR offers several ways to visualize the results of the statistical analyses.
 License: GPL (>= 3)
-Packaged: 2014-06-10 09:03:16 UTC; bettina
+Packaged: 2015-02-11 08:36:00 UTC; bettina
 NeedsCompilation: no
 Repository: CRAN
-Date/Publication: 2014-06-10 12:19:12
+Date/Publication: 2015-02-11 10:39:16

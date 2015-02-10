@@ -73,11 +73,11 @@ rotate <- function(mat){
 #---------------------------------
 tartan <- structure(function(# Creates comparision plot of two co-mutation like analysis.
 	### creates a plot for two results of co-mutation analysis.
-	path_to_file = NULL, 
+	path_to_file_assocpair_csv_result = NULL, 
 	### a csv file with results from co mutation without HLA types. For reference please look in example file.
-	path_to_file2 = NULL, 
+	path_to_file_assocpair_csv_result2 = NULL, 
 	### a csv file with results from co mutation without HLA types. For reference please look in example file.
-	save_name, 
+	save_name_pdf, 
 	### the file name of the result file in pdf format
 	space,
 	### the space between blocks
@@ -110,7 +110,7 @@ tartan <- structure(function(# Creates comparision plot of two co-mutation like 
 	##seealso<< \code{\link{test_for_comutation_without_allel}}
 	##note<< Only use files generated without allel usage!
 	){	
-	test_for_comutation_only_graphics_wo_allels_2_inner(path_to_file, path_to_file2, save_name, space, colors, name_positions, names, ticks, first_position_1, second_position_1, value_1, first_position_2, second_position_2, value_2, with_distance_matrix, path_to_distance_matrix)
+	test_for_comutation_only_graphics_wo_allels_2_inner(path_to_file_assocpair_csv_result, path_to_file_assocpair_csv_result2, save_name_pdf, space, colors, name_positions, names, ticks, first_position_1, second_position_1, value_1, first_position_2, second_position_2, value_2, with_distance_matrix, path_to_distance_matrix)
 	
 },ex=function(){
 	ex <- system.file("extdata", "co_mutation_results_wo_allels.csv", package="SeqFeatR")

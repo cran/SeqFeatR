@@ -309,7 +309,7 @@ create_mini_table_tr <- function(i){
 	mini_table_r <- mini_table[,(which(as.numeric(mini_table[nrow(mini_table),2:ncol(mini_table)])>patnum.threshold)+1)]
 	mini_table_r <- cbind (mini_table[,1],mini_table_r)
 	mini_table_r <- mini_table_r[3:nrow(mini_table_r),]
-	#print (mini_table)	
+	print (mini_table)	
 	return (mini_table_r)
 }
 
@@ -413,22 +413,22 @@ create_ancestral_sequences <- function(path_to_file_s){
 
 #___________________________________________________________
 
-hlaTree <- structure(function(#Find possible escape mutations
+comparewithancestral <- structure(function(#Find possible escape mutations
 	### Takes a tree and a set of sequences and searches for possible escape mutations
 	##details<< 
 	
 	##seealso<< 
 	##note<< 
-	path_to_file_s = NULL,
+	path_to_file_sequence_alignment = NULL,
 	### a FASTA file with sequence data. Homzygot patiens have to have a 00 instead of the HLA typeFor reference please look in
 	### example file.
-	path_to_file_t = NULL,
+	path_to_file_nexus_tree = NULL,
 	### a tree file of the sequences. For reference please look in example file.
 	save_name_csv, 
 	### the file name of the result file in csv format
-	patnum.threshol = 1, 
+	patnum_threshold = 1, 
 	### the minimum number of patients of one HLA type to consider in the calculation.
-	thr.sig.f = 0.05, 
+	significance_level = 0.05, 
 	### p-value threshold below which the results from fishers exact test should be added to output.
 	A11,
 	### the position of the start of the first HLA A Allel in the description block of the FASTA file.
@@ -447,7 +447,7 @@ hlaTree <- structure(function(#Find possible escape mutations
 	B22
 	### the position of the end of the second HLA B Allel in the description block of the FASTA file.
 	){
-	HLA_and_tree_inner(path_to_file_s, path_to_file_t, save_name_csv, patnum.threshol, thr.sig.f, A11, A12, A21, A22, B11, B12, B21, B22)
+	HLA_and_tree_inner(path_to_file_sequence_alignment, path_to_file_nexus_tree, save_name_csv, patnum_threshold, significance_level, A11, A12, A21, A22, B11, B12, B21, B22)
 	
 },ex=function(){
 	ex <- system.file("extdata", "Example.fasta", package="SeqFeatR")
@@ -596,7 +596,7 @@ HLA_and_tree_inner <- function(path_to_file_s = NULL, path_to_file_t = NULL, sav
 
 #hlaTree("../inst/extdata/Example_aa.fasta",
 # "../inst/extdata/Example_tree.nh",
-# "test",
+# "test.csv",
 # 1,
 # 0.05,
 # 10,

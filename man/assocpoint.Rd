@@ -1,92 +1,143 @@
 \name{assocpoint}
 \alias{assocpoint}
-\title{Calculate point mutations vs. feature(s)}
-\description{Searches in a given sequence for possible associations between amino acid/nucleotide and sequence position.}
-\usage{assocpoint(path_to_file_s = NULL,
-    path_to_file_p = NULL, path_to_file_m = NULL, save_name,
+\title{Searches for associations of single alignment positions with feature(s)}
+
+\description{Searches for associations of single nucleotide or amino
+  acid sequence alignment positions with feature(s).}
+  
+\usage{assocpoint(path_to_file_sequence_alignment = NULL,
+    path_to_file_known_epitopes = NULL, path_to_file_binding_motifs = NULL, save_name_pdf,
     save_name_csv, dna = FALSE, 
-    patnum.threshold = 1, optical.significance_level = 0.05, 
-    star.significance_level = 0.001, pot.epitope_level = 0.05, 
-    window_threshold = 0.05, A11, A12, A21, A22, B11, B12, B21, 
-    B22, statistical_correction = "bonferroni",
-    with_phylogenetic_comparison = FALSE,
-    matrix_for_phylo = NULL, reference_sequence=NULL, one_ident=FALSE, window_size=9)}
+    patnum_threshold = 1, optical_significance_level = 0.05, 
+    star_significance_level = 0.001, A11, A12, A21, A22, B11, B12, B21, 
+    B22, multiple_testing_correction = "bonferroni",
+    phylo_bias_check = FALSE,
+    matrix_for_phylo = NULL, path_to_file_reference_sequence=NULL, one_feature=FALSE,
+    window_size=9, epi_plot=FALSE)}
+    
 \arguments{
-  \item{path_to_file_s}{a FASTA file with sequence data. Homzygot patiens have to have a 00 instead of the HLA typeFor reference please look in
-example file.}
-  \item{path_to_file_p}{a csv file with known epitopes. For reference please look in example file.}
-  \item{path_to_file_m}{a csv file with HLA binding motifs if available. For reference please look in example file.}
-  \item{save_name}{the file name of the result file in pdf format}
-  \item{save_name_csv}{the file name of the result file in csv format}
-  \item{dna}{if the data is in DNA or amino Acid Code}
-  \item{patnum.threshold}{the minimum number of patients of one HLA type to consider in the calculation.}
-  \item{optical.significance_level}{the height of the optical horizontal line in the graphical output. It should be yout chosen p-value limit, like 0.05.}
-  \item{star.significance_level}{the height of the invisible horizontal line above which alle points are marked as stars. Should be a high p-value limit,
-like 0,001.}
-  \item{pot.epitope_level}{the level below which a p-value should be consideres in the calculation of possible epitopes. 
-Should be the same as optical.significance_leve.}
-  \item{window_threshold}{the level below which a p-value should be consideres in the calculation of the sliding window. 
-Should be the same as optical.significance_leve. }
-  \item{A11}{the position of the start of the first HLA A Allel in the description block of the FASTA file.}
-  \item{A12}{the position of the end of the first HLA A Allel in the description block of the FASTA file.}
-  \item{A21}{the position of the start of the second HLA A Allel in the description block of the FASTA file.}
-  \item{A22}{the position of the end of the second HLA A Allel in the description block of the FASTA file.}
-  \item{B11}{the position of the start of the first HLA B Allel in the description block of the FASTA file.}
-  \item{B12}{the position of the end of the first HLA B Allel in the description block of the FASTA file.}
-  \item{B21}{the position of the start of the second HLA B Allel in the description block of the FASTA file.}
-  \item{B22}{the position of the end of the second HLA B Allel in the description block of the FASTA file.}
-  \item{statistical_correction}{the statistical correction applied to the p-values. Input can be: "holm",\cr
+  \item{path_to_file_sequence_alignment}{FASTA file with sequence alignment. For reference
+    see example file.}
+  \item{path_to_file_known_epitopes}{csv file with known epitopes. See example file.}
+  \item{path_to_file_binding_motifs}{csv file with HLA binding motifs if
+    available. See example file.}
+  \item{save_name_pdf}{name of file to which results are saved in pdf format.}
+  \item{save_name_csv}{name of file to which results are saved in csv format.}
+  \item{dna}{DNA or amino acid sequences.}
+  \item{patnum_threshold}{minimum number of patients per HLA type to consider in calculation.}
+  \item{optical_significance_level}{height of horizontal line in
+    graphical output indicating significance level, e.g.\ 0.05.}
+  \item{star_significance_level}{height of invisible horizontal line
+    above which all points are marked as stars, e.g.\ 0.001 as level for high
+    significance.}
+  \item{A11}{position of start of first HLA A allele in header line of FASTA file.}
+  \item{A12}{position of end of first HLA A allele in header line of FASTA file.}
+  \item{A21}{position of start of second HLA A allele in header line of FASTA file.}
+  \item{A22}{position of end of second HLA A allele in header line of FASTA file.}
+  \item{B11}{position of start of first HLA B allele in header line of FASTA file.}
+  \item{B12}{position of end of first HLA B allele in header line of FASTA file.}
+  \item{B21}{position of start of second HLA B allele in header line of FASTA file.}
+  \item{B22}{position of end of second HLA B allele in header line of FASTA file.}
+  \item{multiple_testing_correction}{multiple testing correction applied to p-values. Input can be: "holm",\cr
  "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none".}
-  \item{with_phylogenetic_comparison}{if the sequences with the certain trait and Amino Acid with the lowest p.value should be compared in sequence similarity with all sequences. See details.}
-  \item{matrix_for_phylo}{the matrix for phylogenetic analysis. Has to be a matrix which is with this name available in the Biostrings package.}
-  \item{reference_sequence}{Reference sequence for better comparison of results. Will be added as extra column in the results.}
-  \item{one_ident}{if there is only one feature. See details.}
-  \item{window_size}{sizwe for the sliding window - only used in graphical output!}
+  \item{phylo_bias_check}{simple mechanism to detect
+    phylogenetic bias in data. See details.}
+  \item{matrix_for_phylo}{scoring matrix for phylogenetic bias check. Has to be a matrix which is with this name available in the Biostrings package.}
+  \item{path_to_file_reference_sequence}{Reference sequence for orientation. Will be
+    added as extra column in the results. Not used in calculation itself.}
+  \item{one_feature}{if there is only one feature. See details.}
+  \item{window_size}{size of sliding window in graphical output.}
+  \item{epi_plot}{add epitope plot to results pdf file.}
 }
-\details{For every position in the sequences a fisher's exact test of (Certain feature identifier, other feature identifier, aa and not this aa) is calculated and the p-value is pasted in a table.
-If you have only one kind of feature, the please set one_ident to TRUE. This can be if you are to analyse tropisms or treatment with only Yes and No. If you have only one feature it has to be seperated from the rest of the comment line in the fasta file at the end with a semicolon. If you have two kinds of feature (like HLA types) you can give there exact position inside the comment line.
-Every HLA type has a column, every position a row. There is also a graphical output generated in which every HLA type has it's own page. In this output, a line is inserted, which shows the user where the p-value limit is considered above to be significant. 
-Integrated in this graphic are the known epitopes if there are any and the calculated possible epitopes, which are calculated with the known HLA binding motifs. As an extras information a second graphical output is added in which the user can see the level of significant muations in a 9er sliding window.
-Each point in this graphic is the number of mutations in the next nine sequence positions.
-Uses EasyGregExpr from http://www.r-bloggers.com/developing-a-user-friendly-regular-expression-function-easygregexpr/
-Also uses p.adjust from stats package to calculate some p-value correction additionally for the graphical output and as an extra column in the csv output.
-Please consider that you have to use the dna/aa switch depending on your data!
-If pylogenetic comparison was choosen, the programm compares for every lowest p.value below a certain user given value the sequence similarity of the sequences with this trai with the similarity of all sequences with a wilcoxon test and adds the p.values in another column.
-Please use a "B" for unknown amino acid.}
+\details{
+  For each sequence alignment position (each column of sequence
+  alignment), Fisher's exact test is evaluated for a 2-by-2 contingency
+  table of amino acid (or nucleic acid) vs. feature. The resulting
+  p-values are returned in a table. p-values can be corrected for
+  multiple testing using various methods (option
+  multiple_testing_correction). 
+  
+  The input sequence alignment may be consist either of DNA sequences
+  (switch dna = TRUE) or amino acid sequences (dna =
+  FALSE). Undetermined nucleotides or amino acids have to be indicated
+  by the letter "X".
+
+  A phylogentic bias check can be made and the result added as an extra column
+  to the csv result file. For each alignment position with a p-value below a
+  user given threshold (optical_significance_level) a Wilcoxon test is carried
+  out to test the sequence similarity of sequences with the given feature
+  vs. sequences with all other features. It is checked whether sequences with the
+  given feature cluster inside a tree derived by hierarchical clustering
+  based on pairwise sequence distances (computed by hclust with method "ward.D").
+
+  Features may be either a single feature, or HLA types, the latter indicated by four blocks in the FASTA
+  comment lines. The positions of these blocks in the comment lines are
+  defined by parameters A11, ..., B22. For patients with a homozygous
+  HLA allele the second allele has to be "00" (without the double
+  quotes). For single features (no HLA types), set option one_feature=TRUE. The
+  value of the feature (e.g. 'yes / no', or '1 / 2 / 3') should then be
+  given at the end of each FASTA comment, separated from the part before
+  that by a semicolon.
+}
+
+\value{The function generates various types of output: a table of
+  p-values, p-values corrected for multiple testing, z-scores, amino acid with
+  the lowest p-value at this position, result of the Wilcoxon test for
+  phylogenetic bias, and several plots. A Manhattan plot is generated
+  for each feature in a pdf file with alignment positions on the x-axis and
+  p-values on the y-axis.
+  Two different significance levels can be indicated by a line
+  (optical_significance_level) and the change from the normal dot symbol to
+  a star (star_significance_level).
+
+  Optionally (epi_plot = TRUE), a second plot is provided with the number
+  of 'significant' p-values (value of significance chosen by optical_significance_level)
+  in a sliding window of x amino acids ( x can be any number from 1 up to the
+  length of the alignment choosen by 'window_size'. The typical length of an MHC I binding motif is nine).
+  Each point in this plot is the number of 'significant' p-values in the next x
+  alignment positions. Additionally, with given HLA motifs
+  (path_to_file_binding_motifs), a second line is added.
+  This line shows potential epitopes. A potential epitope is assigned if 
+  a 'significant' p-value (value of significance chosen by optical_significance_level)
+  is inside one of the motifs for this HLA type. 
+}
 
 
 \author{Bettina Budeus}
-\note{If a patient has a homozygot HLA Allel, then please change the second one to "00" (without ") instead!}
 
 
-\seealso{\code{\link{assocpointtuple}}}
+\seealso{\code{\link{assocpointpair}}, \code{\link{orPlot}}}
+
 \examples{
-ex <- system.file("extdata", "Example_aa.fasta", package="SeqFeatR")
-	ep <- system.file("extdata", "Example_epitopes_aa.csv", package="SeqFeatR")
-	co <- system.file("extdata", "Example_HLA_binding_motifs_aa.csv", package="SeqFeatR")
-	assocpoint(ex,
- ep,
- co,
- "epitope_results.pdf",
- "epitope_results.csv",
- FALSE,
- 1,
- 0.01, 
- 0.5,
- 0.01,
- 0.01,
- 10,
- 11,
- 13,
- 14,
- 17,
- 18,
- 20,
- 21,
- "bonferroni",
- FALSE,
- BLOSUM62,
- NULL,
- FALSE,
- 9)
+#Input files
+fasta_input <- system.file("extdata", "Example_aa.fasta", package="SeqFeatR")
+epitopes_input <- system.file("extdata", "Example_epitopes_aa.csv", package="SeqFeatR")
+motifs_input <- system.file("extdata", "Example_HLA_binding_motifs_aa.csv", package="SeqFeatR")
+
+#Usage
+assocpoint(
+	path_to_file_sequence_alignment=fasta_input,
+	path_to_file_known_epitopes=epitopes_input,
+	path_to_file_binding_motifs=motifs_input,
+	save_name_pdf="assocpoint_results.pdf",
+	save_name_csv="assocpoint_results.csv",
+	dna=FALSE,
+	patnum_threshold=1,
+	optical_significance_level=0.01, 
+	star_significance_level=0.5,
+	A11=10,
+	A12=11,
+	A21=13,
+	A22=14,
+	B11=17,
+	B12=18,
+	B21=20,
+	B22=21,
+	multiple_testing_correction="bonferroni",
+	phylo_bias_check=FALSE,
+	matrix_for_phylo=BLOSUM62,
+	path_to_file_reference_sequence=NULL,
+	one_feature=FALSE,
+	window_size=9,
+	epi_plot=TRUE)
 }

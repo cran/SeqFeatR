@@ -138,26 +138,26 @@ is_consensus <- structure(function(letter, position){
 })
 
 #-----------------------------------------------------------------------------
-assocpointtuple <- structure(function(# Compare results of co-mutation and epitopes
+assocpointpair <- structure(function(# Compare results of co-mutation and epitopes
 	### Checks which positions in the results of epitope finder are also in the results of given co-mutation. Therefore just compares certain columns of the results, so they have to be in the output format from epitope finder and co-mutation.
 	##seealso<< \code{\link{find_possible_epitopes}}
 	##seealso<< \code{\link{test_for_comutation}}
 	##seealso<< \code{\link{test_for_comutation_without_allel}}
 	##details<< This function takes the results from epitope finder and co-mutation analysis and tries to combine them into one result. It checks if a possible epitope, as it is an output of epitope finder, is also one of the positions which are found in the co mutation. If this is the case, they may be a point of compensatory mutation.
-	path_to_file_s = NULL,
+	path_to_file_sequence_alignment = NULL,
 	### file with sequence data in FASTA format.  For reference please look in example file.
-	path_to_file_e = NULL,
+	path_to_file_assocpoint_csv_result = NULL,
 	### file with possible epitope result data. For reference please look in example file.
-	path_to_file_m = NULL,
+	path_to_file_assocpairfeat_csv_result = NULL,
 	### file with results from co mutation analysis. For reference please look in example file.
-	p.value = 0.05,
+	significance_level = 0.05,
 	### p-value to be defined as significant.
-	save_name_result,
+	save_name_csv,
 	### the file name of the result file.
 	save_name_pos
 	### the file name of the possible compensatory file. Only written if there are such possible compensatory mutations.
 	){
-	result <- check_for_pos_epi_mut_core_inner(path_to_file_s,path_to_file_e,path_to_file_m ,p.value,save_name_result,save_name_pos)
+	result <- check_for_pos_epi_mut_core_inner(path_to_file_sequence_alignment, path_to_file_assocpoint_csv_result, path_to_file_assocpairfeat_csv_result, significance_level, save_name_csv, save_name_pos)
 	return (result)
 },ex=function(){
 	ex <- system.file("extdata", "Example.fasta", package="SeqFeatR")
@@ -210,7 +210,6 @@ check_for_pos_epi_mut_core_inner <- function(path_to_file_s = NULL,path_to_file_
 		result <- "Nothing found"
 	}else {
 		colnames(result) <- c("allel","AA_pair","f.pos", "s.pos","p-value", "is_true", "first_letter_consensus", "second_letter_consensus")
-		print (result)
 
 		possible_compensatory_mutation <- array(dim=c(1,8))
 
@@ -230,3 +229,4 @@ check_for_pos_epi_mut_core_inner <- function(path_to_file_s = NULL,path_to_file_
 }
 
 #---------------------------------------------------------------------
+#assocpointpair("../inst/extdata/Example_aa.fasta", "../inst/extdata/assocpoint_results.csv", "../inst/extdata/assocpairfeat_results.csv", significance_level=0.05, save_name_csv="assocpointpair_result.csv", save_name_pos="possible_compensatory_mutation.csv")

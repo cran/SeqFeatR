@@ -1,19 +1,21 @@
 # Export all names
 export(
   qvalues,
-  assocpointtuple,
+  assoctuple,
   SeqFeatR_GUI,
   assocpoint,
-  founderelim,
-  assoctuple,
+  foundereffectfinder,
+  assocpointpair,
   rewritetuple,
   assocpairfeat,
-  vispairfeat,
-  vispair,
+  visualizepairfeat,
+  visualizepair,
   assocpair,
   tartan,
   orPlot,
-  hlaTree
+  comparewithancestral,
+  getfreqs,
+  volcanoplot
 )
 
 # Import all packages listed as Imports or Depends
@@ -22,6 +24,7 @@ import(
   tcltk2,
   Biostrings,
   plotrix,
+  ggplot2,
   ape
 )
 
@@ -33,3 +36,4 @@ importFrom(phangorn, pml)
 importFrom(phangorn, ancestral.pars)
 importFrom(qvalue, qvalue)
 importFrom(widgetTools, dropdownList)
+importFrom(calibrate, textxy)

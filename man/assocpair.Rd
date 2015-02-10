@@ -1,37 +1,57 @@
 \name{assocpair}
 \alias{assocpair}
-\title{Test for co-mutation without HLA types}
-\description{Calculates if there are two positions in the given sequence which may have a co-mutation.}
-\usage{assocpair(path_to_file_s = NULL,
-    path_to_file_c = NULL, save_name, dna = FALSE,
-    thr.sig.f = 0.05, statistical_correction = "bonferroni")}
+\title{Finding pairs of alignment positions that jointly mutate}
+
+\description{Determines pairs of sequence alignment positions that
+  mutate in a correlated fashion with respect to a consensus sequence.}
+  
+\usage{assocpair(path_to_file_sequence_alignment = NULL,
+    path_to_file_consensus = NULL, save_name_csv, dna = FALSE,
+    significance_level = 0.05, multiple_testing_correction = "bonferroni")}
+    
 \arguments{
-  \item{path_to_file_s}{a FASTA file with sequence data. For reference please look in example file.}
-  \item{path_to_file_c}{a FASTA file with consensus data. For reference please look in example file.}
-  \item{save_name}{the file name of the result file in csv format}
-  \item{dna}{if the data is in DNA or amino Acid Code}
-  \item{thr.sig.f}{p-value threshold below which the results from fishers exact test should be added to output.}
-  \item{statistical_correction}{the statistical correction applied to the p-values. Input can be: "holm",\cr
+  \item{path_to_file_sequence_alignment}{FASTA file with sequence alignment. See example file.}
+  \item{path_to_file_consensus}{FASTA file with consensus sequence. See example file.}
+  \item{save_name_csv}{name of file to which results are written in csv format.}
+  \item{dna}{indicates whether sequences are DNA or amino acids.}
+  \item{significance_level}{significance level for Fisher's exact test.}
+  \item{multiple_testing_correction}{multiple testing correction applied to p-values. Input can be: "holm",\cr
  "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none".}
 }
-\details{For every position in the sequence given within the FASTA file a fishers exact test is made with every other position in the sequence and the Consensus sequence. The result p-values are collected in one big table if they are below a given value (thr.sig.f). If there are any HLA types in the FASTA description they are simply ignored. Also uses p.adjust from stats package to calculate some p-value correction additionally as an extra column in the csv output.}
-\value{a table with every possible co-mutation below the given p-value.}
+\details{For every position in the sequence alignment from the FASTA
+  file a Fisher's exact test is applied with every other position in the
+  sequence to check whether at both positions we have correlated
+  mutations with respect to a given consensus sequence. Significant p-values are
+  collected in one big table. p.adjust from stats package is used for multiple testing
+  correction; corrected values are given as extra column in csv output.
+  
+  In contrast to assocpairfeat, assocpair does not use features, but uses a consensus
+  approach.
+  }
+  
+\value{A csv file with every possible co-mutation below the given p-value.}
 
 \author{Bettina Budeus}
-\note{If you want an graphical output, please use:\cr
-\code{\link{vispair}}.}
+
+\note{For graphical output use:\cr
+\code{\link{visualizepair}}.}
 
 
-\seealso{\code{\link{vispairfeat}}}
+\seealso{\code{\link{visualizepairfeat}}, \code{\link{assocpairfeat}}}
+
 \examples{
+#Input files
 \dontrun{
-ex <- system.file("extdata", "Example_aa.fasta", package="SeqFeatR")
-	ep <- system.file("extdata", "Example_Consensus_aa.fasta", package="SeqFeatR")
-	assocpair(ex,
- ep,
- "co_mutation_results_wo_allels.csv",
- FALSE,
- 0.05,
- "bonferroni")
+fasta_input <- system.file("extdata", "Example_aa.fasta", package="SeqFeatR")
+consensus_input <- system.file("extdata", "Example_Consensus_aa.fasta", package="SeqFeatR")
+	
+#Usage
+assocpair(
+	path_to_file_sequence_alignment=fasta_input,
+	path_to_file_consensus=consensus_input,
+	save_name_csv="assocpair_results.csv",
+	dna=FALSE,
+	significance_level=0.05,
+	multiple_testing_correction="bonferroni")
 }
 }

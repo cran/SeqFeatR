@@ -86,23 +86,25 @@ assoctuple <- structure(function(
 	### Details: Please be aware that it just useses the position in your csv file. If this is NOT the correct position, bechause you removed some positions, then please correct them first in the csv file or keep in mind, that the result file will also be just the relative position from your fasta file. 
 	### Please use the same fasta file you had for epitope analysis!
 	### The values for the analysis to estimate which positions should be included are normaly the corrected p-values but can be anything else. Even an own added column.
-	original_fasta_seq,
+	path_to_file_sequence_alignment,
 	###
-	epi_results,
+	path_to_file_assocpoint_csv_result,
 	###
 	threshold,
 	###
-	min_number_of_ele_in_tupel,
+	min_number_of_elements_in_tuple,
 	###
-	max_number_of_ele_in_tuple,
+	max_number_of_elements_in_tuple,
 	###
-	result_filename,
+	save_name_csv,
 	###
-	column,
+	column_of_feature,
 	### the column in which the type is located for which the analysis should be done
-	column_of_values,
+	column_of_position,
+	#### NEEEEWWW
+	column_of_p_values,
 	### the column from which the (p) values should be taken. See details.
-	column_of_aas,
+	column_of_aa,
 	A11,
 	### the position of the start of the first HLA A Allel in the description block of the FASTA file.
 	A12, 
@@ -119,14 +121,14 @@ assoctuple <- structure(function(
 	### the position of the start of the second HLA B Allel in the description block of the FASTA file.
 	B22,
 	### the position of the end of the second HLA B Allel in the description block of the FASTA file.
-	one_ident,
+	one_feature,
 	### if there is only one identifier
-	idet
+	feature
 	### the identifier which should be analzed. See details. 	
 	### idet is the one identifier inside the comment line of the fasta file which should be compared with all other identifiers. E.g X4 for HIV tropism.
 	){
 
-	result <- get_shared_mutations_inside(original_fasta_seq, epi_results, threshold, min_number_of_ele_in_tupel,	max_number_of_ele_in_tuple, result_filename, column, column_of_values, column_of_aas, A11, A12, A21, A22, B11, B12, B21, B22, one_ident, idet)
+	result <- get_shared_mutations_inside(path_to_file_sequence_alignment, path_to_file_assocpoint_csv_result, threshold, min_number_of_elements_in_tuple, max_number_of_elements_in_tuple, save_name_csv, column_of_feature, column_of_position, column_of_p_values, column_of_aa, A11, A12, A21, A22, B11, B12, B21, B22, one_feature, feature)
 	
 	return (result)
 
@@ -138,8 +140,9 @@ assoctuple <- structure(function(
 	threshold,
 	min_number_of_ele_in_tupel,
 	max_number_of_ele_in_tuple,
-	result_filename,
+	save_name_csv,
 	column,
+	column_of_position,
 	column_of_values,
 	column_of_aas,
 	A11,
@@ -150,12 +153,12 @@ assoctuple <- structure(function(
 	B12, 
 	B21, 
 	B22,
-	one_ident,
-	idet
+	one_identifier,
+	identifier
 	)
 })
 
-get_shared_mutations_inside <- function(original_fasta_seq, epi_results, threshold, min_number_of_ele_in_tupel, max_number_of_ele_in_tuple, result_filename, column, column_of_values, column_of_aas, A11, A12, A21, A22, B11, B12, B21, B22, one_ident, idet){
+get_shared_mutations_inside <- function(original_fasta_seq, epi_results, threshold, min_number_of_ele_in_tupel, max_number_of_ele_in_tuple, result_filename, column, column_of_position, column_of_values, column_of_aas, A11, A12, A21, A22, B11, B12, B21, B22, one_ident, idet){
 
 	if (is.null(original_fasta_seq)==FALSE){
 		sm_wo_set_input_file_ori_sequences(original_fasta_seq)
@@ -179,7 +182,7 @@ get_shared_mutations_inside <- function(original_fasta_seq, epi_results, thresho
 	#print (below_threshold_f)
 	#mir <- occ
 	AA <- data[which(as.numeric(data[,column_of_values]) < threshold), column_of_aas]
-	below_threshold_number_f <- which(as.numeric(data[,column_of_values]) < threshold)
+	below_threshold_number_f <- data[which(as.numeric(data[,column_of_values]) < threshold), column_of_position]
 	below_threshold_number <- c()
 
 	if(length(below_threshold_number_f) < 2){
@@ -198,6 +201,7 @@ get_shared_mutations_inside <- function(original_fasta_seq, epi_results, thresho
 		result <- combn(below_threshold_number, m, FUN = NULL, simplify = TRUE)
 		all_result[[length(all_result) + 1L]] <- result
 	}
+
 	#3.5 make set of data for the x positions and mutations,
 	below_threshold <- data[below_threshold_number,]
 	all_aa_seqs <- list()
@@ -206,7 +210,6 @@ get_shared_mutations_inside <- function(original_fasta_seq, epi_results, thresho
 		result <- get_seqs_for_certain_position(below_threshold_number[i], StringSequences, AA[i])
 		all_aa_seqs[[length(all_aa_seqs) + 1L]] <- result
 	}
-	print (all_aa_seqs)
 
 	#3.6 get Number of interessting one and others
 	if (one_ident){
@@ -280,8 +283,12 @@ get_shared_mutations_inside <- function(original_fasta_seq, epi_results, thresho
 				d <- "F"
 			}
 			pos <- strsplit(toString(list_of_tuple[,j]), ", ")
+			positions_list <- c()
+			for (posi in 1:length(pos[[1]])){
+				positions_list <- paste(positions_list, pos[[1]][posi], "\t", sep="")
+			}
 			#6. write answer in file: position combo, AA combo, in x seqs together
-			cat(j, "\tPosition combination: \t", pos[[1]][1], "\t", pos[[1]][2], "\twere in\t", result, "\tsequences  together\t", "\twith p-value of\t", p_value, "\t",a, "\t",b, "\t",c, "\t",d,"\n",file = result_filename, append = TRUE)
+			cat(j, "\tPosition combination: \t", positions_list, "were in\t", result, "\tsequences  together\t", "\twith p-value of\t", p_value, "\t",a, "\t",b, "\t",c, "\t",d,"\n",file = result_filename, append = TRUE)
 			gc()
 		}
 	}

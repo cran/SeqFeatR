@@ -271,15 +271,15 @@ assocpairfeat <- structure(function( #Test for co-mutation
 	##seealso<< \code{\link{test_for_comutation_only_graphics}}
 	##note<< If you want an graphical output, please use \code{\link{test_for_comutation_only_graphics}}.
 	## If a patient has a homozygot HLA Allel, then please change the second one to "00" (without ") instead!
-	path_to_file = NULL,
+	path_to_file_sequence_alignment = NULL,
 	### a FASTA file with sequence data. For reference please look in example file.
-	save_name, 
+	save_name_csv, 
 	### the file name of the result file in csv format
 	dna = FALSE,
 	### if the data is in DNA or amino Acid Code
-	patnum.threshol = 1, 
+	patnum_threshold = 1, 
 	### the minimum number of patients of one HLA type to consider in the calculation.
-	thr.sig.f = 0.05, 
+	significance_level = 0.05, 
 	### p-value threshold below which the results from fishers exact test should be added to output.
 	A11a,
 	### the position of the start of the first HLA A Allel in the description block of the FASTA file.
@@ -297,10 +297,10 @@ assocpairfeat <- structure(function( #Test for co-mutation
 	### the position of the start of the second HLA B Allel in the description block of the FASTA file.
 	B22a,
 	### the position of the end of the second HLA B Allel in the description block of the FASTA file.
-	statistical_correction = "bonferroni"
+	multiple_testing_correction = "bonferroni"
 	### the statistical correction applied to the p-values. Input can be: "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none".
 	){
-	result <- test_for_comutation_inner(path_to_file, save_name, dna, patnum.threshol, thr.sig.f, A11a, A12a, A21a, A22a, B11a, B12a, B21a, B22a, statistical_correction)
+	result <- test_for_comutation_inner(path_to_file_sequence_alignment, save_name_csv, dna, patnum_threshold, significance_level, A11a, A12a, A21a, A22a, B11a, B12a, B21a, B22a, multiple_testing_correction)
 	return (result)
 	
 },ex=function(){

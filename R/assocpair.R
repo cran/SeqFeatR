@@ -328,20 +328,20 @@ assocpair <- structure(function(#Test for co-mutation without HLA types
 	##details<< For every position in the sequence given within the FASTA file a fishers exact test is made with every other position in the sequence and the Consensus sequence. The result p-values are collected in one big table if they are below a given value (thr.sig.f). If there are any HLA types in the FASTA description they are simply ignored. Also uses p.adjust from stats package to calculate some p-value correction additionally as an extra column in the csv output.
 	##note<< If you want an graphical output, please use  \code{\link{test_for_comutation_only_graphics_wo_allels}}.
 	##seealso<< \code{\link{test_for_comutation_only_graphics_wo_allels}}
-	path_to_file_s = NULL,
+	path_to_file_sequence_alignment = NULL,
 	### a FASTA file with sequence data. For reference please look in example file.
-	path_to_file_c = NULL,
+	path_to_file_consensus = NULL,
 	### a FASTA file with consensus data. For reference please look in example file.
-	save_name, 
+	save_name_csv, 
 	### the file name of the result file in csv format
 	dna = FALSE,
 	### if the data is in DNA or amino Acid Code
-	thr.sig.f = 0.05, 
+	significance_level = 0.05, 
 	### p-value threshold below which the results from fishers exact test should be added to output.
-	statistical_correction = "bonferroni"
+	multiple_testing_correction = "bonferroni"
 	### the statistical correction applied to the p-values. Input can be: "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none".
 	){
-	result <- test_for_comutation_without_allel_inner(path_to_file_s, path_to_file_c, save_name, dna, thr.sig.f, statistical_correction)
+	result <- test_for_comutation_without_allel_inner(path_to_file_sequence_alignment, path_to_file_consensus, save_name_csv, dna, significance_level, multiple_testing_correction)
 	return (result)
 	
 },ex=function(){

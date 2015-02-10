@@ -1,0 +1,16 @@
+SeqFeatR Version 1.0.7
+======================
+
+Changes:
+- new functionality! Get frequencies for epitope positions
+- graphical results from assocpoint can be with or without possible epitope plot
+- updated man-pages
+
+SeqFeatR Version 1.0.6
+======================
+
+Changes:
+- GUI updates
+- possibility to use Bayes as correction for assocpoint
+- OR Plot can be p-values or odds ratios now
+- new plot! volcano plot for feature association results

@@ -125,16 +125,18 @@ test_if_same_subtree <- function(list){
 	}
 	is_sub <- FALSE
 	lowest_number_of_tips <- length(sequences)
-	for (pos_tree in 1:length(subtrees_which_are_possible)){
-		number_of_tips <- list_of_subtrees[[subtrees_which_are_possible[pos_tree]]]$Ntip
-		if (number_of_tips >= same*length_of_list && !is_sub){
-			is_sub <- FALSE
-			lowest_number_of_tips <- number_of_tips
-		}
-		else{
-			is_sub <- TRUE
-			if (number_of_tips < lowest_number_of_tips){
+	if(!is.null(subtrees_which_are_possible)){
+		for (pos_tree in 1:length(subtrees_which_are_possible)){
+			number_of_tips <- list_of_subtrees[[subtrees_which_are_possible[pos_tree]]]$Ntip
+			if (number_of_tips >= same*length_of_list && !is_sub){
+				is_sub <- FALSE
 				lowest_number_of_tips <- number_of_tips
+			}
+			else{
+				is_sub <- TRUE
+				if (number_of_tips < lowest_number_of_tips){
+					lowest_number_of_tips <- number_of_tips
+				}
 			}
 		}
 	}
@@ -144,17 +146,17 @@ test_if_same_subtree <- function(list){
 
 #Main______________________________________________________________________________
 
-founderelim <- structure(function(# Founder Eliminator
+foundereffectfinder <- structure(function(# Founder Eliminator
 	### takes the result of co-mutation analysis and corrects them with an added column with a note if the row is in the same branch.
-	path_to_file_s = NULL,
+	path_to_file_sequence_alignment = NULL,
 	### a FASTA file with sequence data. For reference please look in example file.
-	path_to_file_p = NULL,
+	path_to_file_assocpair_csv_result = NULL,
 	### a csv file with the results of the co-mutation analysis. For reference please look in example file.
-	path_to_file_m = NULL,
+	path_to_file_nexus_tree = NULL,
 	### a nexus file with tree data. For reference please look in example file.
-	save_name,
+	save_name_csv,
 	### the file name of the result file.
-	value = 7
+	threshold = 7
 	### number of tips so that the whole bulk is considered as in one branch.
 	##details<< Takes the positions of the co-mutation results and a tree of the sequences with which the co-mutation was created and counts how often the pair of AAs is in one branch. If there are more than 'value' times the number of found co-mutations in one generated subtree, they are considered to be because of the founder effect.
 	##seealso<< \code{\link{test_for_comutation_without_allel}}
@@ -162,7 +164,7 @@ founderelim <- structure(function(# Founder Eliminator
 	##references<< Mayr, Ernst (1954). "Change of genetic environment and evolution". In Julian Huxley. 
 	##Evolution as a Process. London: George Allen & Unwin. OCLC 974739
 	){
-	result <- founder_eliminator_main_inner(path_to_file_s, path_to_file_p, path_to_file_m, save_name, value)
+	result <- founder_eliminator_main_inner(path_to_file_sequence_alignment, path_to_file_assocpair_csv_result, path_to_file_nexus_tree, save_name_csv, threshold)
 	return (result)
 	
 },ex=function(){
@@ -239,3 +241,12 @@ founder_eliminator_main_inner <- function(path_to_file_s = NULL, path_to_file_p 
 	### the same file as the co muation input file with an added column in which the user can read if the row is found possibly due to the founder effect.
 
 }
+
+#ex <- "../inst/extdata/Example_aa.fasta"
+#ep <- "../inst/extdata/co_mutation_results_wo_allels.csv"
+#co <- "../inst/extdata/Example_tree.nh"
+#founderelim(ex,
+# ep,
+# co,
+# "d.csv",
+# 7)

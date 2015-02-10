@@ -25,19 +25,19 @@ co_g_get_input_file <- structure(function(# Create plot for results from co-muta
 
 #---------------------------------
 
-vispairfeat <- structure(function(# Create co-mutation plot with allels.
+visualizepairfeat <- structure(function(# Create co-mutation plot with allels.
 	### creates a plot for the results of co-mutation analysis
-	path_to_file = NULL, 
+	path_to_file_assocpairfeat_csv_result = NULL, 
 	### a csv file with results from co mutation with HLA types. For reference please look in example file.
-	save_name, 
+	save_name_pdf, 
 	### the file name of the result file in pdf format
-	thr.sig.fi = 0.01
+	significance_level = 0.01
 	### the significance value below which the results of the co-mutation analysis are considered to be relevant enough to be plotted
 	##details<< For every HLA type (if only one p-value is below thr.sig.fi) a page in an pdf is created with a sequence x sequences graphic. In this graphic every dots (one position with the other position) colour is based on it's value. The colour code is on the right side.
 	##seealso<< \code{\link{test_for_comutation}}
 	##note<< Only use files generated without allel usage!
 	){
-	test_for_comutation_only_graphics_inner(path_to_file, save_name, thr.sig.fi)
+	test_for_comutation_only_graphics_inner(path_to_file_assocpairfeat_csv_result, save_name_pdf, significance_level)
 	
 },ex=function(){
 	ex <- system.file("extdata", "co_mutation_results.csv", package="SeqFeatR")

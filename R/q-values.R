@@ -24,13 +24,13 @@ qvalues <- structure(function(# Calculate q-values
 	### calculates and adds q_values to a list of given p_values in csv format with p_value as column header for this column.
 	##details<< Takes a csv file with a column which is called p_values and uses the qvalues package to calculate from this column the corresponding q-values.
 	## Uses qvalue package and the calculation within this package to estimate the q-values.
-	path_to_file = NULL,
+	path_to_file_csv = NULL,
 	### file with a column with p-values. Has to be in csv and contain a column called p_value.  
 	### For reference please look in example file.	
-	save_name
+	save_name_csv
 	### output file name	
 	){
-	result <- calculate_qvalues_inner(path_to_file, save_name)
+	result <- calculate_qvalues_inner(path_to_file_csv, save_name_csv)
 	return (result)
 },ex=function(){
 	mut <- system.file("extdata", "co_mutation_results.csv", package="SeqFeatR")
