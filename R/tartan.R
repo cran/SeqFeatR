@@ -254,11 +254,11 @@ test_for_comutation_only_graphics_wo_allels_2_inner <- function(path_to_file = N
 		}else{
 			optical_result_matrix2 <- rotate(rotate(t(rotate(rotate(optical_result_matrix2)))))
 			scale_factor <- max(optical_result_matrix2)/max(optical_result_matrix)
-			cat(max(optical_result_matrix2), max(optical_result_matrix), "\n")
-			cat(min(optical_result_matrix2), min(optical_result_matrix), "\n")
+			#cat(max(optical_result_matrix2), max(optical_result_matrix), "\n")
+			#cat(min(optical_result_matrix2), min(optical_result_matrix), "\n")
 			optical_result_matrix <- optical_result_matrix*scale_factor
-			cat(max(optical_result_matrix2), max(optical_result_matrix), "\n")
-			cat(min(optical_result_matrix2), min(optical_result_matrix), "\n")
+			#cat(max(optical_result_matrix2), max(optical_result_matrix), "\n")
+			#cat(min(optical_result_matrix2), min(optical_result_matrix), "\n")
 
 			nrow1 <- nrow(optical_result_matrix)
 			nrow2 <- nrow(optical_result_matrix2)
@@ -280,9 +280,10 @@ test_for_comutation_only_graphics_wo_allels_2_inner <- function(path_to_file = N
 			optical_result_matrix_both <- optical_result_matrix + optical_result_matrix2 #
 			print (max(max(optical_result_matrix2), max(optical_result_matrix)))
 			max_color <- max(max(optical_result_matrix2), max(optical_result_matrix))
-			diag(optical_result_matrix_both) <- max_color
+			diag(optical_result_matrix_both) <- -1
 		}
 		list_of_inserts <- ticks
+		optical_result_matrix_both[optical_result_matrix_both == 0] <- -1
 
 		b_optical_result_matrix_both <- make_spare_room(optical_result_matrix_both, list_of_inserts, space)
 		optical_result_matrix_both <- b_optical_result_matrix_both[[1]]
@@ -291,6 +292,7 @@ test_for_comutation_only_graphics_wo_allels_2_inner <- function(path_to_file = N
 		max_color <- max(optical_result_matrix_both)
 
 		optical_result_matrix_both <- rotate(optical_result_matrix_both)
+		print (optical_result_matrix_both)
 		length_of_seq <- nrow(optical_result_matrix_both)
 
 		red <- c(seq(0.99,0.05,length=25))
@@ -324,3 +326,21 @@ test_for_comutation_only_graphics_wo_allels_2_inner <- function(path_to_file = N
 
 	return(TRUE)
 }
+
+#tartan(
+#	path_to_file_assocpair_csv_result="tart_1.csv",
+#	path_to_file_assocpair_csv_result2="tart_2.csv",
+#	save_name_pdf="tartan_plot_example.pdf",
+#	space=2,
+#	colors=c("wheat", "darkblue", "black", "green"),
+#	name_positions=c(1,12),
+#	names=c("S","F"),
+#	ticks=c(13),
+#	first_position_1=2,
+#	second_position_1=3,
+#	value_1=4,
+#	first_position_2=2,
+#	second_position_2=3,
+#	value_2=4,
+#	with_distance_matrix=FALSE,
+#	path_to_distance_matrix=NULL)

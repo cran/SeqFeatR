@@ -1,6 +1,6 @@
 %% Creator: Inkscape inkscape 0.48.3.1, www.inkscape.org
 %% PDF/EPS/PS + LaTeX output extension by Johan Engelen, 2010
-%% Accompanies image file 'log.pdf' (pdf, eps, ps)
+%% Accompanies image file 'phylo_ex.pdf' (pdf, eps, ps)
 %%
 %% To include the image in your LaTeX document, write
 %%   \input{<filename>.pdf_tex}
@@ -36,7 +36,7 @@
   }%
   \providecommand\rotatebox[2]{#2}%
   \ifx\svgwidth\undefined%
-    \setlength{\unitlength}{881.8810696bp}%
+    \setlength{\unitlength}{866.3064408bp}%
     \ifx\svgscale\undefined%
       \relax%
     \else%
@@ -48,7 +48,7 @@
   \global\let\svgwidth\undefined%
   \global\let\svgscale\undefined%
   \makeatother%
-  \begin{picture}(1,1.49334697)%
-    \put(0,0){\includegraphics[width=\unitlength]{log.pdf}}%
+  \begin{picture}(1,0.89164469)%
+    \put(0,0){\includegraphics[width=\unitlength]{phylo_ex.pdf}}%
   \end{picture}%
 \endgroup%

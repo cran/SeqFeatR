@@ -4,6 +4,7 @@ export(
   assoctuple,
   SeqFeatR_GUI,
   assocpoint,
+  assocpointhierarchical,
   foundereffectfinder,
   assocpointpair,
   rewritetuple,
@@ -25,7 +26,8 @@ import(
   Biostrings,
   plotrix,
   ggplot2,
-  ape
+  ape,
+  R2jags
 )
 
 # Import smaller dependencies
@@ -37,3 +39,12 @@ importFrom(phangorn, ancestral.pars)
 importFrom(qvalue, qvalue)
 importFrom(widgetTools, dropdownList)
 importFrom(calibrate, textxy)
+importFrom(coda, as.mcmc)
+importFrom("grDevices", "colorRampPalette", "dev.off", "pdf", "rgb")
+importFrom("graphics", "abline", "axis", "barplot", "box", "image",
+             "layout", "legend", "lines", "mtext", "par", "plot")
+importFrom("stats", "cutree", "fisher.test", "p.adjust", "rgamma",
+             "sd")
+importFrom("utils", "capture.output", "combn", "packageVersion",
+             "read.csv2", "read.table", "vignette", "write.csv2",
+             "write.table")

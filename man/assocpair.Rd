@@ -26,7 +26,8 @@
   correction; corrected values are given as extra column in csv output.
   
   In contrast to assocpairfeat, assocpair does not use features, but uses a consensus
-  approach.
+  approach. Please be sure, that this is really what you want to use. Otherwise, use
+  assocpairfeat or assoctuple instead.
   }
   
 \value{A csv file with every possible co-mutation below the given p-value.}
@@ -37,7 +38,7 @@
 \code{\link{visualizepair}}.}
 
 
-\seealso{\code{\link{visualizepairfeat}}, \code{\link{assocpairfeat}}}
+\seealso{\code{\link{visualizepairfeat}}, \code{\link{assocpairfeat}}, \code{\link{assoctuple}}}
 
 \examples{
 #Input files

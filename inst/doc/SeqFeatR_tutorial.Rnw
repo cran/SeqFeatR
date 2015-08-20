@@ -277,5 +277,70 @@ An example may illustrate this so-called \emph{multiple testing problem} (or \em
  \item \texttt{SeqFeatR} can only understand letters from canonical DNA/RNA (A, C, G, T, U) and amino acid alphabets (A, C, D, E, ...) in the FASTA sequences. Do not use special characters (?!; etc.) or characters for wobbels (R, K, Y, ...) in sequences. You can however use X or B for unidentified nucleic acids or amino acids. 
 \end{itemize}
 
+\section{Advanced Feature: Bayes Factor in SeqFeatR}
+If for any reason you do not want to work with p-values, you can use \texttt{SeqFeatR} with Bayes Factor (BF) instead of the above mentioned Fisher's exact test. The BF for two hypotheses $H_0$ and $H_1$, given sequence and feature data $D$, is the ratio of posterior odds and the corresponding prior odds:\\
+$BF = \left(p(H_1|D)/p(H_0|D)\right)/\left(\pi_1/\pi_0\right)$. In other words, the BF equals the posterior odds if the prior probabilities $\pi_0,\pi_1$ are equal and thus the prior odds is 1.
+
+Imagine the following table:
+
+\begin{tabular}{c c c c}
+    &   & \multicolumn{2}{c}{certain amino acid}\\\cline{3-4}
+    &   &    + & - \\\cline{2-4}
+    \multirow{2}{*}{feature $f$}& + &          $p_{11}$    &      $p_{12}$    \\
+    & - &   $p_{21}$      &     $p_{22}$         \\\cline{1-4}
+    \label{tab:exampleBF}
+\end{tabular}
+
+ In our case, $H_1$ is the hypothesis that a feature is associated with an amino acid or nucleotide at an alignment position, and $H_0$ is the hypothesis that there is no such association. The higher the BF, the more likely $H_1$ (association) and the less likely $H_0$ (no association).
+
+Here we use a BF for the hypothesis $H_1$ that feature and amino acid at an alignment position are \emph{close} to independence vs.\ $H_0$ that they are independent. Albert and Gupta presented a 'close to independence' model which is now used in \texttt{SeqFeatR} \footnote{Albert J. Bayesian Computation with R. Springer Verlag; 2009.}. The prior belief in the independence is expressed by a user chosen $K$: the higher this hyperparameter, the more dominant the independence structure will be in comparison to the observed counts, and for $K\rightarrow \infty$ complete independence is achieved.
+
+While \texttt{SeqFeatR} allows for setting an explicit $K$ value, it may not be easy to specify an appropriate value of $K$ that is applicable to all alignment positions. Therefore, \texttt{SeqFeatR} also offers an empirical Bayes variant of this BF. In this variant, an individual value of $K$ is estimated from each contingency table itself.
+
+\section{Advanced Feature: Discovering associations between mutation tuples and features}
+If you have discovered single positions with feature associations, you can use SeqFeatR to discover if those positions correlate and are as a combination associated with a feature. These associations are far from visible in the sequences itself, but they are there:
+\begin{itemize}
+  \item There is a strong association of feature $HLA*A01$ with amino acid pair PQ at the 3 position and 27 position, though patient 6 is an exception as she is $HLA*A01$ and has not PQ but WQ.
+  \item There is an association of feature $HLA*A02$ with amino acid pair DH at the 3 and 23 position, though patient 6 is an exception as she is $HLA*A02$ and has not DH but DY.
+\end{itemize}
+
+\texttt{SeqFeatR} tests \emph{all} sequence position pairs below a given p-value and quickly identifies the 3+27 pair as being statistically significantly associated with the feature ($HLA*A01$) or its absence. \texttt{SeqFeatR} shows these associations graphically as a heat map and in combination with another feature as a ``Tartan plot''.
+
+\subsection{An example: association of HLA type and pairs}
+\label{sec:exampl-assoc-pair}
+We have noted that in the above alignment there is seemingly a strong association of the occurrence of amino acids P at position 3 and amino acid Q at position 27 with the feature $HLA*A01$. The probability and strength of this association can again be quantified, by a p-value computed with Fisher's exact test and by an odds ratio.
+
+In the above example of the association of P at position 3 and Q at position 27 with feature $HLA*A01$, \texttt{SeqFeatR} internally would first collect occurrences in a frequency table and then compute from that frequency table p-value and OR like in the case of a single position \ref{sec:an-exampl-assoc}:
+
+\begin{itemize}
+  \item 6 sequences with HLA*A01 \emph{and} P3Q27
+  \item 0 sequences with \emph{not} HLA*A01 \emph{and} with P3Q27
+  \item 1 sequences with HLA*A01 \emph{and} \emph{not} P3Q27
+  \item 7 sequences with \emph{not} HLA*A01 \emph{and not} P3Q27
+\end{itemize}
+
+Thus, we obtain the following contingency table:
+
+    \begin{tabular}{c c c c}
+    &   & \multicolumn{2}{c}{DH} \\\cline{3-4}
+    &   &    + & -\\\cline{2-4}
+    \multirow{2}{*}{HLA A*01}& + &          6    &      1\\
+    & - &   0     &     7   \\\cline{1-4}
+    \label{tab:pairHLA}
+  \end{tabular}
+
+Fisher's exact test yields a p-value $< 0.005$ and we have an OR of Infinity. Thus we have a \emph{significant and strongly positive} association of HLA*A01 and P3Q27.
+
+\section{Tartan plot: visual comparison of different associations of features and sequence position tuples}
+The Tartan plot is a way to visualize the comparison of two different types of associations between pairs of sequence alignment positions (lower left vs. upper right triangle). Association strengths are color coded (color legend on the right) and depend e.g. on the p-value of the association of this pair and the feature. For orientation, axes can be annotated and sequence substructures can be indicated by lines. The different types of associations can be for example two different HLA-types, or HLA-type and distance in the protein of the sequences. Here we show an example of two HLA-types, HLA*A01 and HLA*B03 \ref{fig:tart}.
+
+\begin{figure}
+ \centering
+ \def\svgwidth{0.80\columnwidth}
+ \input{tart.pdf_tex}
+ \caption[Tartan plot.]{Tartan plot. This plot combines the information of two position pair and feature associations. The first feature (upper triangle) is HLA*A01, the second one (lower triangle) is HLA*B03. A color-filled field represents the value of a position pair according to the color legend. There are additional annotations in this graphic to explain what you see in \textcolor{red}{red}. Those are \textit{not} in the real output from \texttt{SeqFeatR}.}
+ \label{fig:tart}
+\end{figure}
+
 \end{document}
 

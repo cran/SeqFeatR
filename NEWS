@@ -1,4 +1,12 @@
-SeqFeatR Version 1.0.7
+SeqFeatR Version 0.2.0
+======================
+Changes:
+- Bayes Factor for association
+- Hierarchical Bayes for association as extra function which uses R2jags and JAGS.
+  JAGS has to be installed if you want to run assocpointhierarchical.
+
+
+SeqFeatR Version 0.1.7
 ======================
 
 Changes:
@@ -6,7 +14,7 @@ Changes:
 - graphical results from assocpoint can be with or without possible epitope plot
 - updated man-pages
 
-SeqFeatR Version 1.0.6
+SeqFeatR Version 0.1.6
 ======================
 
 Changes:

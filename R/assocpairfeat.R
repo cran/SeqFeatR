@@ -153,8 +153,8 @@ make_pair_array <- function(){
 make_special_pair_array <- function(){
 	pair_array <- array(rep(0,1),c(2,1))
 	counter <- 1
-	for (i in 57:57){
-		for (j in 396:396){
+	for (i in 3:3){
+		for (j in 23:23){
 			col <- c(i,j)
 			pair_array[,counter] <- col
 			counter <- counter+1
@@ -436,7 +436,7 @@ test_for_comutation_inner <- function(path_to_file = NULL, save_name, dna = FALS
 # "co_mutation_results.csv",
 # FALSE,
 # 1,
-# 0.05,
+# 0.2,
 # 10,
 # 11,
 # 13,

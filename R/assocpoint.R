@@ -32,6 +32,43 @@ easyGregexpr <- function(pattern, charvector, ...) {
   return(convertMatches)
 }
 
+bayes_fac <- function(y, K, m){
+
+    rdirichlet = function(n, alpha) {
+        l <- length(alpha)
+        x <- matrix(rgamma(l * n, alpha), ncol = l, byrow = TRUE)
+        sm <- x %*% rep(1, l)
+        return(x/as.vector(sm))
+    }
+    ldirichlet = function(alpha) {
+        return(rowSums(lgamma(alpha)) - lgamma(rowSums(alpha)))
+    }
+    yc = colSums(y)
+    yr = rowSums(y)
+    n = sum(yc)
+    d = dim(y)
+    I = d[1]
+    J = d[2]
+    etaA = rdirichlet(m, yr + 1)
+    etaB = rdirichlet(m, yc + 1)
+    Keta = c()
+    KetaY = c()
+    for (i in 1:I) {
+        for (j in 1:J) {
+            Keta = cbind(Keta, K * etaA[, i] * etaB[, j])
+            KetaY = cbind(KetaY, K * etaA[, i] * etaB[, j] + 
+                y[i, j])
+        }
+    }
+    logint = ldirichlet(KetaY) - ldirichlet(Keta)
+    for (i in 1:I) logint = logint - yr[i] * log(etaA[, i])
+    for (j in 1:J) logint = logint - yc[j] * log(etaB[, j])
+    int = exp(logint)
+    return(list(bf = mean(int), nse = sd(int)/sqrt(m)))
+}
+
+
+
 #search for "change" for points where changes are possible
 #please check before executing
 
@@ -130,6 +167,14 @@ find.neqzero <- function(array){
 	}
 	r
 }
+
+KD <- function(mat) {
+        rs = rowSums(mat)
+        cs = colSums(mat)
+        eta = rs %*% t(cs)/sum(mat)
+        Kd = sum(mat) - sum(abs(eta - mat))
+        Kd
+    }
 
 #return a vector from 0.1 till lowest 10 based potence of input
 get_10_based <- function(value){
@@ -256,23 +301,62 @@ create_pos_epi_csv <- function(pos.epitope_list, seq, epitope, allel, original_p
 
 find_smallest_cluster_number <- function(cluster, seqs, seqs_to_comp){
 	if (length(seqs_to_comp) > 1){
-		for (i in seq(from = length(seqs), to = 1)){
-			groups <- cutree(cluster, k=i)
-			seqs_in_same_cluster <- test_if_in_one_cluster(groups, seqs_to_comp)		
-			if(seqs_in_same_cluster){
-				return (i/20)
-			}
+		groups <- cutree(cluster, k=seq(from = (length(seqs)-1), to = 1))
+		result_vectors <- c()
+		for (i in 1:ncol(groups)){
+			seqs_in_same_cluster <- test_if_in_one_cluster(groups[,i], seqs_to_comp)
+			result_vectors <- rbind(result_vectors, seqs_in_same_cluster)
+			#if(seqs_in_same_cluster){
+			#	return ((ncol(groups)-i)/length(seqs))
+			#}
 		}
+		rS <- rowSums(result_vectors)
+		positions <- seq(1:ncol(groups))
+		return (lm(rS ~ positions)$coefficients[1]*-1)
 	}
 	else{
-		return (1/20)
+		return (NA)
 	}
 }
 
-test_if_in_one_cluster <- function(group, seqs){
-	special_groups <- group[1:length(seqs)]
-	identical <- all(special_groups[1] == special_groups)
-	return (identical)
+test_if_in_one_cluster <- function(group, seqs_to_comp){
+	group_number <- 0
+	number_of_member <- 0
+	result_vector <- c(0,0,0,0,0,0)
+	for(i in 1:max(group)){
+		group_with_max <- group[group == i]
+		names_of <- names(group_with_max)
+		is_inside <- as.numeric(names(seqs_to_comp) %in% names_of)
+		#print (is_inside)
+		if(100/length(is_inside)*sum(is_inside) >= 40){
+			result_vector[1] <- 1
+		}
+		if(100/length(is_inside)*sum(is_inside) >= 50){
+			result_vector[2] <- 1
+		}
+		if(100/length(is_inside)*sum(is_inside) >= 60){
+			result_vector[3] <- 1
+		}
+		if(100/length(is_inside)*sum(is_inside) >= 70){
+			result_vector[4] <- 1
+		}
+		if(100/length(is_inside)*sum(is_inside) >= 80){
+			result_vector[5] <- 1
+		}
+		if(100/length(is_inside)*sum(is_inside) >= 90){
+			result_vector[6] <- 1
+		}
+	}
+	return (result_vector)
+}
+
+addtolist <- function(items, counter){
+
+	p.values.all.all <- .GlobalEnv[["p.values.all.all"]]
+
+	p.values.all.all[[counter]] <- items
+
+	.GlobalEnv[["p.values.all.all"]] <- p.values.all.all
 }
 
 
@@ -283,7 +367,7 @@ assocpoint <- structure(function(#Find possible epitopes
 	## Every HLA type has a column, every position a row. There is also a graphical output generated in which every HLA type has it's own page. In this output, a line is inserted, which shows the user where the p-value limit is considered above to be significant. 
 	## Integrated in this graphic are the known epitopes if there are any and the calculated possible epitopes, which are calculated with the known HLA binding motifs. As an extras information a second graphical output is added in which the user can see the level of significant muations in a 9er sliding window.
 	## Each point in this graphic is the number of mutations in the next nine sequence positions.
-	## If pylogenetic comparison was choosen, the programm compares for every lowest p.value below a certain user given value the sequence similarity of the sequences with this trai with the similarity of all sequences with a wilcoxon test and adds the p.values in another column.
+	## If pylogenetic comparison was choosen, the programm compares for every lowest p.value below a certain user given value the sequence similarity of the sequences with this trai with the similarity of all sequences with a Phylogenetic biason test and adds the p.values in another column.
 	## Uses EasyGregExpr from http://www.r-bloggers.com/developing-a-user-friendly-regular-expression-function-easygregexpr/
 	## Also uses p.adjust from stats package to calculate some p-value correction additionally for the graphical output and as an extra column in the csv output.
 	## Please consider that you have to use the dna/aa switch depending on your data!
@@ -328,10 +412,16 @@ assocpoint <- structure(function(#Find possible epitopes
 	### the position of the end of the second HLA B Allel in the description block of the FASTA file.
 	multiple_testing_correction = "bonferroni",
 	### the statistical correction applied to the p-values. Input can be: "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none".
+	bayes_factor=FALSE,
+	### if bayes factor should be applied instead of Fisher's exact test for association. See details.
+	constant_dirichlet_precision_parameter=FALSE, 
+	### if K is constant
+	dirichlet_precision_parameter=20,
+	### The Dirichlet precision parameter for evaluation with Bayes factor. See details.
 	phylo_bias_check = FALSE,
 	### if the sequences with the certain trait and Amino Acid with the lowest p.value should be compared in sequence similarity with all sequences. See details.
-	matrix_for_phylo = NULL,
-	### the matrix for phylogenetic analysis. Has to be a matrix which is with this name available in the Biostrings package.
+	offset = FALSE,
+	### offest for phylo bias check
 	path_to_file_reference_sequence = NULL,
 	### Reference sequence for better comparison of results
 	one_feature=FALSE,
@@ -340,10 +430,10 @@ assocpoint <- structure(function(#Find possible epitopes
 	### size for the sliding window
 	epi_plot=FALSE
 	){
-	#print (reference_sequence)
-	#print (path_to_file_p)
+	#print (path_to_file_reference_sequence)
+	#print (multiple_testing_correction)
 	#print (path_to_file_m)
-	result <- find_possible_epitopes_inner(path_to_file_sequence_alignment, path_to_file_known_epitopes, path_to_file_binding_motifs, save_name_pdf, save_name_csv, dna, patnum_threshold, optical_significance_level, star_significance_level, optical_significance_level, optical_significance_level, A11, A12, A21, A22, B11, B12, B21, B22, multiple_testing_correction, phylo_bias_check, matrix_for_phylo, path_to_file_reference_sequence, one_feature, window_size, epi_plot)
+	result <- find_possible_epitopes_inner(path_to_file_sequence_alignment, path_to_file_known_epitopes, path_to_file_binding_motifs, save_name_pdf, save_name_csv, dna, patnum_threshold, optical_significance_level, star_significance_level, optical_significance_level, optical_significance_level, A11, A12, A21, A22, B11, B12, B21, B22, multiple_testing_correction, bayes_factor, constant_dirichlet_precision_parameter, dirichlet_precision_parameter, phylo_bias_check, offset, path_to_file_reference_sequence, one_feature, window_size, epi_plot)
 	return(result)
 
 },ex=function(){
@@ -371,14 +461,13 @@ assocpoint <- structure(function(#Find possible epitopes
  33,
  "bonferroni",
  FALSE,
- matrix_for_phylo = NULL,
  reference_sequence = NULL,
  one_feature=FALSE,
  window_size=9,
  pos_epi_plot=FALSE)
 })
 
-find_possible_epitopes_inner <- function(path_to_file_s = NULL, path_to_file_p = NULL, path_to_file_m = NULL, save_name, save_name_csv, dna = FALSE, patnum.threshold = 1, optical.significance_level = 0.05, star.significance_level = 0.001, pot.epitope_level = 0.05, window_threshold = 0.05, A11, A12, A21, A22, B11, B12, B21, B22, statistical_correction = "bonferroni", with_phylogenetic_comparison = FALSE, matrix_for_phylo = NULL, reference_sequence = NULL, one_ident, window_size, pos_epi_plot=FALSE){
+find_possible_epitopes_inner <- function(path_to_file_s = NULL, path_to_file_p = NULL, path_to_file_m = NULL, save_name, save_name_csv, dna = FALSE, patnum.threshold = 1, optical.significance_level = 0.05, star.significance_level = 0.001, pot.epitope_level = 0.05, window_threshold = 0.05, A11, A12, A21, A22, B11, B12, B21, B22, statistical_correction = "bonferroni", bayes_factor, constant_dirichlet_precision_parameter, dirichlet_precision_parameter=20, with_phylogenetic_comparison = FALSE, offset, reference_sequence = NULL, one_ident, window_size, pos_epi_plot=FALSE){
 
 	if (!is.null(reference_sequence) && reference_sequence == 0){
 		reference_sequence <- NULL
@@ -419,19 +508,12 @@ find_possible_epitopes_inner <- function(path_to_file_s = NULL, path_to_file_p =
 
 	number_of_sequences <- length(sequences)
 
-	if (with_phylogenetic_comparison && !length(matrix_for_phylo)==0 ){
-		data(list=matrix_for_phylo, envir = environment())
-		matrix_for_phylog <- get(matrix_for_phylo)
-		BLOSUM62_with_gap <- cbind(matrix_for_phylog, rep(0, nrow(matrix_for_phylog)))
-		BLOSUM62_with_gap <- rbind(BLOSUM62_with_gap, rep(0, ncol(BLOSUM62_with_gap)))
-
-		rownames(BLOSUM62_with_gap) <- c(rownames(matrix_for_phylog), "-")
-		colnames(BLOSUM62_with_gap) <- c(colnames(matrix_for_phylog), "-")
-
+	if (with_phylogenetic_comparison){
 		StringSetsequences_p <- .GlobalEnv[["StringSetsequences"]]
 		StringSetsequences <- sample(StringSetsequences_p, min(100,length(StringSetsequences_p)))
 		counter <- 0
-		dist.vec <- stringDist(StringSetsequences, method = "substitutionMatrix", diag = FALSE, upper = FALSE, type = "global", substitutionMatrix = BLOSUM62_with_gap, gapOpening = 0, gapExtension = -1)
+		dist.vec <- dist.vec <- stringDist(StringSetsequences, method = "levenshtein")
+		mean_dist_all <- mean(dist.vec)
 		distance_matrix <- matrix(dist.vec, ncol=1)
 		cat (mean(distance_matrix[1]), "\n", file="distances.txt", append=TRUE)
 		cat (sd(distance_matrix[1]), "\n", file="distances.txt", append=TRUE)
@@ -504,6 +586,9 @@ all.aa_3 <- c()
 all.aa_4 <- c()
 all.odds <- c()
 
+#all standard errors for bayes factor
+all_sses <- c()
+
 #save stattest
 all.stattest <- c()
 
@@ -527,7 +612,11 @@ allels.counter <- 0
 
 sequences_names <- names(sequences)
 
-p.values.all <- c()
+#all svings
+p.values.all.all <- list(NULL)
+length(p.values.all.all) <- length(allels)
+
+.GlobalEnv[["p.values.all.all"]] <- p.values.all.all
 
 for(allel.num in 1:length(allels)){
   	if(allels.count[allel.num]>patnum.threshold){
@@ -539,6 +628,7 @@ for(allel.num in 1:length(allels)){
 		#table for illustration
 		allels.counter <- allels.counter + 1
 		probs.max <- c()
+		p.values.all <- c()
     		p.values.min <- c()
 		odds.ratio.all <- c()
 		aa_values_m <- c()
@@ -551,6 +641,7 @@ for(allel.num in 1:length(allels)){
     		p.values2 <- c()
 		probs.norm <- c()
     		probs2 <- c()
+		sse_all <- c()
 		stattest <- c()
 		# for each letter in FASTA:
    		for (j in 1:min_FASTA_length){
@@ -559,6 +650,7 @@ for(allel.num in 1:length(allels)){
       			#for certain allel calculate fisher's exact test's minimum p-value among the tests for all amino acids (aa/!aa ; allel/!allel)
       			p.values <- c()
 			probs <- c()
+			sse <- c()
 			odds.ratio <- c()
 			aa_values <- c()
 			aa_values2 <- c()
@@ -584,20 +676,20 @@ for(allel.num in 1:length(allels)){
 				n_aa_and_h <- length(which(subset_has_allel != aa))
 				n_aa_and_n_h <- length(which(subset_not_has_allel != aa))
         			small.table = matrix(c(aa_and_h, n_aa_and_h, aa_and_n_h, n_aa_and_n_h),nrow=2)
-				####BAYES - NOT AVAILABLE YET!
-#				if (statistical_correction == "Bayes"){					
-#					I = 10000 # simulations
-#					y1 <- aa_and_h
-#					y2 <- n_aa_and_h
-#					n1 <- aa_and_h + aa_and_n_h
-#					n2 <- n_aa_and_h + n_aa_and_n_h
-#
-#					theta1 = rbeta(I, y1+1, (n1-y1)+1)  
-#					theta2 = rbeta(I, y2+1, (n2-y2)+1)
-#
-#					diff = theta1-theta2  # simulated diffs
-#					probs <- c(probs, mean(theta1>theta2))
-#				}else{
+				####BAYES - FACTOR
+				if(!constant_dirichlet_precision_parameter){
+					dirichlet_precision_parameter <- KD(small.table)
+					if (dirichlet_precision_parameter == 0){
+						dirichlet_precision_parameter <- 0.01
+					}
+				}
+				if (bayes_factor){					
+					m=1000
+					res <- bayes_fac(small.table, as.numeric(dirichlet_precision_parameter), m)
+					probs <- c(probs, res$bf)
+					odds.ratio <- c(odds.ratio, ((aa_and_h * n_aa_and_n_h)/(n_aa_and_h * aa_and_n_h)))
+					sse <- c(sse, res$nse)
+				}else{
 		  			#only calculate p-values from contingency tables with row sums above threshold or zero
 		  			if(sum(small.table[1,])*sum(small.table[2,])!=0 & (sum(small.table[1,])<=rowsum.threshold | sum(small.table[2,])<=rowsum.threshold))
 					next
@@ -614,24 +706,26 @@ for(allel.num in 1:length(allels)){
 						cat((allel.num), "\t", j, "\t", (small.table[1,1]), "\t", (small.table[2,1]), "\t", (small.table[1,2]), "\t", (small.table[2,2]), "\t", aacids[k], "\t", test.result$p.value, "\n", file= "logging.csv", append=TRUE)
 					}
 					odds.ratio <- c(odds.ratio, test.result$estimate)
-#				}
+				}
        				#print(test.result)
 				aa_values <- c(aa_values, small.table[1,1])
 				aa_values2 <- c(aa_values2, small.table[2,1])
 				aa_values3 <- c(aa_values3, small.table[1,2])
 				aa_values4 <- c(aa_values4, small.table[2,2])
      			}
-			####BAYES - NOT AVAILABLE YET
-#			if (statistical_correction == "Bayes"){	
-#				probs.max <- c(probs.max, max(probs))
-#				position <- which(probs == max(probs))
-#				probs.norm <- c(probs.norm, 100*max(probs))
-#			}else{
+			####BAYES - FACTOR
+			if (bayes_factor){	
+				probs.max <- c(probs.max, max(probs))
+				position <- which(probs == max(probs))
+				probs.norm <- c(probs.norm, max(probs))
+				sse_all <- c(sse_all, sse[position])
+				p.values.all.little <- cbind(probs, NA)
+			}else{
       				p.values.min <- c(p.values.min, 1-min(p.values))
 				position <- which(p.values == min(p.values))
 				p.values.norm <- c(p.values.norm, min(p.values))
-#			}
-			p.values.all.little <- cbind(p.values, NA)
+				p.values.all.little <- cbind(p.values, NA)
+			}
 			if (length(position)>1){
 				random_pos <- sample(position, 1)
 				aa_1 <- c(aa_1, paste("/", aa_values[random_pos]))
@@ -654,37 +748,110 @@ for(allel.num in 1:length(allels)){
 				p.values.all.little[position, 2] <- "min"
 			}
 			p.values.all <- rbind(p.values.all, p.values.all.little)
-			####BAYES - NOT AVAILABLE YET
-#			if (statistical_correction == "Bayes"){	
-#					#print ("Nothing here yet")
-#			}else{
+			####BAYES - FACTOR
+			if (bayes_factor & with_phylogenetic_comparison){	
+				print ("Nothing here yet (phylogenetic bias)")
+			}else{
 				if (p.values.norm[j] <= optical.significance_level && with_phylogenetic_comparison){
 					singleAA <- as.character(subseq(StringSetsequences_p, j, j))
 					seq_number_with_AA <- which(singleAA==aa_values_m[j])
 					seq_number_without_AA <- which(singleAA!=aa_values_m[j])
 					seqs_to_comp <- StringSetsequences_p[seq_number_with_AA]
 					other_seqs <- StringSetsequences_p[seq_number_without_AA]
-					if (length(seqs_to_comp) > (20/2)){
-						seqs_to_comp <- sample(seqs_to_comp, (20/2))
+          				miny <- min(10, length(seqs_to_comp), length(other_seqs))
+					pre_number_of_cluster <- c()
+          				for (tim in 1:100){
+			  			if (length(seqs_to_comp) > miny){
+			  				seqs_to_comp_sam <- sample(seqs_to_comp, miny)
+			  			}else{
+			  				seqs_to_comp_sam <- seqs_to_comp
+			  			}
+			  			if (length(other_seqs) > miny){
+			  				other_seqs_sam <- sample(other_seqs, miny)
+			  			}else{
+			  				other_seqs_sam <- other_seqs
+			  			}
+			  			labls <- which(labels(dist.vec) %in% names(seqs_to_comp_sam))
+			  			labls_other <- which(labels(dist.vec) %in% names(other_seqs_sam))
+			  			short_one <- as.matrix(dist.vec)[labls,labls]
+			  			large_one <- as.matrix(dist.vec)[labls_other,labls_other]
+						if (is.numeric(offset)){
+							pre_number_of_cluster <- c(pre_number_of_cluster, mean(short_one)+offset < mean(large_one) )
+						}else{
+							pre_number_of_cluster <- c(pre_number_of_cluster, mean(short_one)+sd(short_one)/2 < mean(large_one) )	
+						}
 					}
-					if (length(other_seqs) > (20-length(seqs_to_comp))){
-						other_seqs <- sample(other_seqs, (20-length(seqs_to_comp)))
-					}
-					all_seqs <- c(seqs_to_comp, other_seqs)
-					all_dists <- stringDist(all_seqs, method = "substitutionMatrix", diag = FALSE, upper = FALSE, type = "global", substitutionMatrix = BLOSUM62_with_gap, gapOpening = 0, gapExtension = -1)
-					clust <- hclust(all_dists, method = "ward.D")
-					number_of_cluster <- find_smallest_cluster_number(clust, all_seqs, seqs_to_comp)
-					stattest <- c(stattest, number_of_cluster)
+          				number_of_cluster <- sum(as.numeric(pre_number_of_cluster))
+					stattest <- c(stattest, as.character(number_of_cluster))
 					cat (number_of_cluster, "\n", file="distances_clust.txt", append=TRUE) 			
 				}
 				else{
 					stattest <- c(stattest, "/")
 				}
 				#print (position)
-#			}
-
+			}
     		}
+		addtolist(p.values.all, allel.num)
+		###### BAYES FACTOR
+		if (bayes_factor){
+			all.pvals<-c(all.pvals,probs.norm)
+			aa.all_level <- cbind(aa.all_level, aa_level)
+			all.aas <- cbind(all.aas, aa_values_m)
+			all.aa_1 <- cbind(all.aa_1, aa_1)
+			all.aa_2 <- cbind(all.aa_2, aa_2)
+			all.aa_3 <- cbind(all.aa_3, aa_3)
+			all.aa_4 <- cbind(all.aa_4, aa_4)
+			all.odds <- cbind(all.odds, odds.ratio.all)
+			all_sses <- cbind(all_sses, sse_all)
 
+		}else{
+			all.pvals<-c(all.pvals,p.values.norm)
+			aa.all_level <- cbind(aa.all_level, aa_level)
+			all.aas <- cbind(all.aas, aa_values_m)
+			all.aa_1 <- cbind(all.aa_1, aa_1)
+			all.aa_2 <- cbind(all.aa_2, aa_2)
+			all.aa_3 <- cbind(all.aa_3, aa_3)
+			all.aa_4 <- cbind(all.aa_4, aa_4)
+			all.odds <- cbind(all.odds, odds.ratio.all)
+			all.stattest <- cbind(all.stattest, stattest)
+		}
+  	}
+}
+
+p.values.all.all <- .GlobalEnv[["p.values.all.all"]]
+
+	####BAYES - FACTOR
+if (bayes_factor){
+	all.pvals.corrected <- c()
+}else{
+	all.pvals.corrected <- c()
+	all.pvals.corrected.all.all <- lapply(p.values.all.all,function(r){p.adjust(r[,1], method = statistical_correction)})
+}
+
+#print (p.values.all.all)
+#mir <- occ
+
+for(allel.num in 1:length(allels)){
+  	if(allels.count[allel.num]>patnum.threshold){
+		#if (allels[allel.num] == "A24"){
+		print (allel.num)
+
+		p.values.all <- p.values.all.all[[allel.num]]
+
+		if(bayes_factor){
+			probs.max <- as.numeric(p.values.all[which(p.values.all[,2]=="min")])
+			probs.norm <- probs.max
+			all.pvals.corrected <- c(all.pvals.corrected, probs.norm)
+		}else{
+			all.pvals.corrected.all <- all.pvals.corrected.all.all[[allel.num]]
+			p.values.min <- 1-as.numeric(all.pvals.corrected.all[which(p.values.all[,2]=="min")])
+			p.values.norm <- as.numeric(all.pvals.corrected.all[which(p.values.all[,2]=="min")])
+
+			all.pvals.corrected <- c(all.pvals.corrected, p.values.norm)
+		}
+	#	print (p.values.min)
+	#	print (p.values.norm)
+	#	mir <- occ
     		#evaluate
     		#get epitopes of this allel
 		#1:2 is column, first number in allel.epitopes is row
@@ -694,22 +861,22 @@ for(allel.num in 1:length(allels)){
 		#fill allel.epitopes2 with zeros for FASTA-length, then put max of p.values.min for all values between epitope border	
 		allel.epitopes2 <- rep(0,min_FASTA_length)
 		
-		####BAYES - NOT AVAILABLE YET
-#		if (statistical_correction == "Bayes"){	
-#	    		if(length(allel.epitopes[,1])>0)
-#			for (i in 1:length(allel.epitopes[,1])){
- #       			allel.epitopes2[allel.epitopes[i,1]:allel.epitopes[i,2]] <- max(probs.max)
-#			}
-#			all.pvals_one_allel<-c(probs.max)
-#			matrix.all.pvals_pre <- matrix(all.pvals_one_allel, ncol=1, dimnames=list(1:length(probs.max),allels[allel.num]))
-#		}else{
+		####BAYES - FACTOR
+		if (bayes_factor){
+			if(length(allel.epitopes[,1])>0)
+			for (i in 1:length(allel.epitopes[,1])){
+        			allel.epitopes2[allel.epitopes[i,1]:allel.epitopes[i,2]] <- 1
+			}
+			all.pvals_one_allel<-c(probs.max)
+			matrix.all.pvals_pre <- matrix(all.pvals_one_allel, ncol=1, dimnames=list(1:length(probs.max),allels[allel.num]))
+		}else{
 	    		if(length(allel.epitopes[,1])>0)
 	      		for (i in 1:length(allel.epitopes[,1])){
-				allel.epitopes2[allel.epitopes[i,1]:allel.epitopes[i,2]] <- max(p.values.min)
+				allel.epitopes2[allel.epitopes[i,1]:allel.epitopes[i,2]] <- 1
 			}
 			all.pvals_one_allel<-c(p.values.min)
 			matrix.all.pvals_pre <- matrix(all.pvals_one_allel, ncol=1, dimnames=list(1:length(p.values.min),allels[allel.num]))
-#		}
+		}
 		#post_production for every allel above threshold:
 		#first: create a matrix with a column for position,
 		#second: remove all rows with values beneath a certain threshold
@@ -756,7 +923,7 @@ for(allel.num in 1:length(allels)){
 			pos.epitopes.f.allel <- c()
 			for (i in 1:length(pos.epitopes[,1])){
 				pos.epi <- gsub("A[*]0*", "A", substr(pos.epitopes[i,1],1, 4)) # replaces the *and leading 0s in HLA type for possible epitope
-				pos.epi <- gsub("B[*]0*", "B", pos.epi)		
+				pos.epi <- gsub("B[*]0*", "B", pos.epi)
 				if (pos.epi == allel){
 					pos.epitopes.f.allel <- c(pos.epitopes.f.allel, pos.epitopes[i,2])
 				}
@@ -774,100 +941,137 @@ for(allel.num in 1:length(allels)){
 		}
 
 		#window-slinding-thingy
-		number_of_mutations_in_sequence <- c()
-		for (i in 1:(length(all.pvals_one_allel)-(window_size-1))){
-			number_of_mutations_in_window <- 0
-			for (j in 0:(window_size-1)){
-				value <- all.pvals_one_allel[i+j]
-				thresh <- 1-window_threshold
-				if (value > thresh){
-					number_of_mutations_in_window <- (number_of_mutations_in_window + 1)
+		if (bayes_factor){
+			number_of_mutations_in_sequence <- c()
+			for (i in 1:(length(all.pvals_one_allel)-(window_size-1))){
+				number_of_mutations_in_window <- 0
+				for (j in 0:(window_size-1)){
+					value <- all.pvals_one_allel[i+j]
+					thresh <- 10^window_threshold
+					if (value > thresh){
+						number_of_mutations_in_window <- (number_of_mutations_in_window + 1)
+					}
 				}
+				number_of_mutations_in_sequence <- c(number_of_mutations_in_sequence, ((1.0/window_size)*number_of_mutations_in_window))
 			}
-			number_of_mutations_in_sequence <- c(number_of_mutations_in_sequence, ((1.0/window_size)*number_of_mutations_in_window))
+		}else{
+			number_of_mutations_in_sequence <- c()
+			for (i in 1:(length(all.pvals_one_allel)-(window_size-1))){
+				number_of_mutations_in_window <- 0
+				for (j in 0:(window_size-1)){
+					value <- all.pvals_one_allel[i+j]
+					thresh <- 1-window_threshold
+					if (value > thresh){
+						number_of_mutations_in_window <- (number_of_mutations_in_window + 1)
+					}
+				}
+				number_of_mutations_in_sequence <- c(number_of_mutations_in_sequence, ((1.0/window_size)*number_of_mutations_in_window))
+			}
 		}
 
-		####BAYES - NOT AVAILABLE YET
-#		if (statistical_correction == "Bayes"){	
-#			highest_prob_value <- max(probs.norm)
-#		}else{
+		####BAYES - FACTOR
+		if (bayes_factor){	
+			highest_prob_value <- max(probs.norm)
+			probs.norm <- log10(probs.norm)
+		}else{
 			lowest_p_value <- min(p.values.norm)
 			vector_for_yaxis <- get_10_based(min(p.values.norm))
-#		}
-		if (pos_epi_plot){
-			par(fig=c(0,0.75,0.55,1))#, new=TRUE)
-			if (is.null(path_to_file_m) & !is.null(path_to_file_p)){
-				plot (panel.first=
-				c(lines(allel.epitopes2, type="l", col="red")), #known epitopes in red
-				number_of_mutations_in_sequence, type="l", col = "black", main=paste(allels[allel.num],"(",allels.count[allel.num]," patient(s))",sep=""),ylab="fraction of significant p-values", xlab="", xlim=c(0, min_FASTA_length), ylim=c(0,1)) # plot for percental number of mutations in 9er
-				par(fig=c(0,1,0.6,1))
-				legend("right", c("known epitopes", paste("# mutations in ", window_size,"er \nsliding window", sep="")),lty=c(1,1,1),lwd=c(1.5,1.5,1.5),col=c("red","black"),bty="n", cex=0.8, xjust=0)
-			}else if (!is.null(path_to_file_m) & is.null(path_to_file_p)){
-				plot (panel.first=
-				c(lines(pos.epitope.plot, type="l", col = "darkgoldenrod1")), #known epitopes in red
-				number_of_mutations_in_sequence, type="l", col = "black", main=paste(allels[allel.num],"(",allels.count[allel.num]," patient(s))",sep=""),ylab="fraction of significant p-values", xlab="", xlim=c(0, min_FASTA_length), ylim=c(0,1)) # plot for percental number of mutations in 9er
-				par(fig=c(0,1,0.6,1))
-				legend("right", c("possible new epitopes", paste("# mutations in ", window_size,"er \nsliding window", sep="")),lty=c(1,1,1),lwd=c(1.5,1.5,1.5),col=c("darkgoldenrod1","black"),bty="n", cex=0.8, xjust=0)
-			}else if (is.null(path_to_file_p) & is.null(path_to_file_m)){
-				plot (number_of_mutations_in_sequence, type="l", col = "black", main=paste(allels[allel.num],"(",allels.count[allel.num]," patient(s))",sep=""),ylab="fraction of significant p-values", xlab="", xlim=c(0, min_FASTA_length)) # plot for percental number of mutations in 9er
-				par(fig=c(0,1,0.6,1))
-				legend("right", c(paste("# mutations in ", window_size,"er \nsliding window", sep="")),lty=c(1,1,1),lwd=c(1.5,1.5,1.5),col=c("black"),bty="n", cex=0.8, xjust=0)
-
-			}else{
-				plot (panel.first=
-				c(lines(allel.epitopes2, type="l", col="red"), #known epitopes in red
-				lines(pos.epitope.plot, type="l", col = "darkgoldenrod1")), # possible epitopes in darkgoldenrod1
-				number_of_mutations_in_sequence, type="l", col = "black", main=paste(allels[allel.num],"(",allels.count[allel.num]," patient(s))",sep=""),ylab="fraction of significant p-values", xlab="", xlim=c(0, min_FASTA_length), ylim=c(0,1)) # plot for percental number of mutations in 9er
-				par(fig=c(0,1,0.6,1))
-				legend("right", c("known epitopes","possible new epitopes", paste("# mutations in ", window_size,"er \nsliding window", sep="")),lty=c(1,1,1),lwd=c(1.5,1.5,1.5),col=c("red","darkgoldenrod1","black"),bty="n", cex=0.8, xjust=0)
-			}
-			par(fig=c(0,0.75,0.0,0.6), new=TRUE)
 		}
-		####BAYES - NOT AVAILABLE YET
-#		if (statistical_correction == "Bayes"){	
-#			plot(probs.norm, type="p", col="black", pch=20, ylab="p-values", xlab="Alignment position", xlim=c(0, min_FASTA_length))
-#			#axis(side=2, at=vector_for_yaxis, labels=vector_for_yaxis)
-#			corrected_opti <- optical.significance_level
-#			corrected_star <- star.significance_level
-#			abline(h=optical.significance_level, col = "gray60", lty=2)
-#			probs.above_sig_level_norm <- probs.norm
-#			probs.above_star_level_norm <- probs.norm
-#			for (i in 1:length(probs.norm)){
-#				if (probs.norm[i] >= (corrected_opti)){
-#					if (probs.norm[i] >= (corrected_star)){
-#						probs.above_star_level_norm[i] <- probs.norm[i]
-#					}
-#					else{
-#						probs.above_sig_level_norm[i] <- probs.norm[i]
-#						probs.above_star_level_norm[i] <- 0
-#					}
-#				}
-#				else {
-#					probs.above_sig_level_norm[i] <- 0
-#					probs.above_star_level_norm[i] <- 0
-#				}
-#			}
-#			vert_lines <- which(probs.above_star_level_norm > 0)
-#			for (sp in 1:length(vert_lines)){
-#				abline(v=vert_lines[sp], col = "gray60", lty=2)
-#			}
-#			lines(probs.above_sig_level_norm, type="p", col = "red", pch=20) #points above a certain significance level
-#			lines(probs.above_star_level_norm, type="p", col = "red", pch=8) #stars above a certain significance level
-#
-#			all.pvals<-c(all.pvals,probs.norm)
-#			aa.all_level <- cbind(aa.all_level, aa_level)
-#			all.aas <- cbind(all.aas, aa_values_m)
-#			all.aa_1 <- cbind(all.aa_1, aa_1)
-#			all.aa_2 <- cbind(all.aa_2, aa_2)
-#			all.aa_3 <- cbind(all.aa_3, aa_3)
-#			all.aa_4 <- cbind(all.aa_4, aa_4)
-#			#all.odds <- cbind(all.odds, odds.ratio.all)
-#			above.star.all <- cbind(above.star.all, probs.above_star_level_norm)
-#			all.stattest <- cbind(all.stattest, stattest)
-#		}else{	
+		####BAYES - FACTOR
+		if (bayes_factor){
+			if (pos_epi_plot){
+				par(fig=c(0,0.75,0.55,1))#, new=TRUE)
+				if (is.null(path_to_file_m) & !is.null(path_to_file_p)){
+					plot (panel.first=
+					c(lines(allel.epitopes2, type="l", col="red")), #known epitopes in red
+					number_of_mutations_in_sequence, type="l", col = "black", main=paste(allels[allel.num]," (",allels.count[allel.num]," sequences)",sep=""),ylab="fraction of significant Bayes Factors", xlab="", xlim=c(0, min_FASTA_length), ylim=c(0,1)) # plot for percental number of mutations in 9er
+					par(fig=c(0,1,0.6,1))
+					legend("right", c("known epitopes", paste("# mutations in ", window_size,"er \nsliding window", sep="")),lty=c(1,1,1),lwd=c(1.5,1.5,1.5),col=c("red","black"),bty="n", cex=0.8, xjust=0)
+				}else if (!is.null(path_to_file_m) & is.null(path_to_file_p)){
+					plot (panel.first=
+					c(lines(pos.epitope.plot, type="l", col = "darkgoldenrod1")), #known epitopes in red
+					number_of_mutations_in_sequence, type="l", col = "black", main=paste(allels[allel.num]," (",allels.count[allel.num]," sequences)",sep=""),ylab="fraction of significant Bayes Factors", xlab="", xlim=c(0, min_FASTA_length), ylim=c(0,1)) # plot for percental number of mutations in 9er
+					par(fig=c(0,1,0.6,1))
+					legend("right", c("possible new epitopes", paste("# mutations in ", window_size,"er \nsliding window", sep="")),lty=c(1,1,1),lwd=c(1.5,1.5,1.5),col=c("darkgoldenrod1","black"),bty="n", cex=0.8, xjust=0)
+				}else if (is.null(path_to_file_p) & is.null(path_to_file_m)){
+					plot (number_of_mutations_in_sequence, type="l", col = "black", main=paste(allels[allel.num]," (",allels.count[allel.num]," sequences)",sep=""),ylab="fraction of significant Bayes Factors", xlab="", xlim=c(0, min_FASTA_length), ylim=c(0,1)) # plot for percental number of mutations in 9er
+					par(fig=c(0,1,0.6,1))
+					legend("right", c(paste("# mutations in ", window_size,"er \nsliding window", sep="")),lty=c(1,1,1),lwd=c(1.5,1.5,1.5),col=c("black"),bty="n", cex=0.8, xjust=0)
+
+				}else{
+					plot (panel.first=
+					c(lines(allel.epitopes2, type="l", col="red"), #known epitopes in red
+					lines(pos.epitope.plot, type="l", col = "darkgoldenrod1")), # possible epitopes in darkgoldenrod1
+					number_of_mutations_in_sequence, type="l", col = "black", main=paste(allels[allel.num]," (",allels.count[allel.num]," sequences)",sep=""),ylab="fraction of significant Bayes Factors", xlab="", xlim=c(0, min_FASTA_length), ylim=c(0,1)) # plot for percental number of mutations in 9er
+					par(fig=c(0,1,0.6,1))
+					legend("right", c("known epitopes","possible new epitopes", paste("# mutations in ", window_size,"er \nsliding window", sep="")),lty=c(1,1,1),lwd=c(1.5,1.5,1.5),col=c("red","darkgoldenrod1","black"),bty="n", cex=0.8, xjust=0)
+				}
+				par(fig=c(0,0.75,0.0,0.6), new=TRUE)
+			}	
+			plot(probs.norm, type="p", col="black", pch=20, ylab="log10(Bayes Factor)", xlab="Alignment position", xlim=c(0, min_FASTA_length))
+			if (!pos_epi_plot){
+				mtext(paste(allels[allel.num]," (",allels.count[allel.num]," sequences)",sep=""))
+			}
+			corrected_opti <- optical.significance_level
+			corrected_star <- star.significance_level
+			abline(h=optical.significance_level, col = "gray60", lty=2)
+			probs.above_sig_level_norm <- probs.norm
+			probs.above_star_level_norm <- probs.norm
+			for (i in 1:length(probs.norm)){
+				if (probs.norm[i] >= (corrected_opti)){
+					if (probs.norm[i] >= (corrected_star)){
+						probs.above_star_level_norm[i] <- probs.norm[i]
+					}
+					else{
+						probs.above_sig_level_norm[i] <- probs.norm[i]
+						probs.above_star_level_norm[i] <- NA
+					}
+				}
+				else {
+					probs.above_sig_level_norm[i] <- NA
+					probs.above_star_level_norm[i] <- NA
+				}
+			}
+			vert_lines <- which(probs.above_star_level_norm > 0)
+			for (sp in 1:length(vert_lines)){
+				abline(v=vert_lines[sp], col = "gray60", lty=2)
+			}
+			lines(probs.above_sig_level_norm, type="p", col = "red", pch=20) #points above a certain significance level
+			lines(probs.above_star_level_norm, type="p", col = "red", pch=8) #stars above a certain significance level
+
+		}else{	
+			if (pos_epi_plot){
+				par(fig=c(0,0.75,0.55,1))#, new=TRUE)
+				if (is.null(path_to_file_m) & !is.null(path_to_file_p)){
+					plot (panel.first=
+					c(lines(allel.epitopes2, type="l", col="red")), #known epitopes in red
+					number_of_mutations_in_sequence, type="l", col = "black", main=paste(allels[allel.num]," (",allels.count[allel.num]," sequences)",sep=""),ylab="fraction of significant p-values", xlab="", xlim=c(0, min_FASTA_length), ylim=c(0,1)) # plot for percental number of mutations in 9er
+					par(fig=c(0,1,0.6,1))
+					legend("right", c("known epitopes", paste("# mutations in ", window_size,"er \nsliding window", sep="")),lty=c(1,1,1),lwd=c(1.5,1.5,1.5),col=c("red","black"),bty="n", cex=0.8, xjust=0)
+				}else if (!is.null(path_to_file_m) & is.null(path_to_file_p)){
+					plot (panel.first=
+					c(lines(pos.epitope.plot, type="l", col = "darkgoldenrod1")), #known epitopes in red
+					number_of_mutations_in_sequence, type="l", col = "black", main=paste(allels[allel.num]," (",allels.count[allel.num]," sequences)",sep=""),ylab="fraction of significant p-values", xlab="", xlim=c(0, min_FASTA_length), ylim=c(0,1)) # plot for percental number of mutations in 9er
+					par(fig=c(0,1,0.6,1))
+					legend("right", c("possible new epitopes", paste("# mutations in ", window_size,"er \nsliding window", sep="")),lty=c(1,1,1),lwd=c(1.5,1.5,1.5),col=c("darkgoldenrod1","black"),bty="n", cex=0.8, xjust=0)
+				}else if (is.null(path_to_file_p) & is.null(path_to_file_m)){
+					plot (number_of_mutations_in_sequence, type="l", col = "black", main=paste(allels[allel.num]," (",allels.count[allel.num]," sequences)",sep=""),ylab="fraction of significant p-values", xlab="", xlim=c(0, min_FASTA_length)) # plot for percental number of mutations in 9er
+					par(fig=c(0,1,0.6,1))
+					legend("right", c(paste("# mutations in ", window_size,"er \nsliding window", sep="")),lty=c(1,1,1),lwd=c(1.5,1.5,1.5),col=c("black"),bty="n", cex=0.8, xjust=0)
+
+				}else{
+					plot (panel.first=
+					c(lines(allel.epitopes2, type="l", col="red"), #known epitopes in red
+					lines(pos.epitope.plot, type="l", col = "darkgoldenrod1")), # possible epitopes in darkgoldenrod1
+					number_of_mutations_in_sequence, type="l", col = "black", main=paste(allels[allel.num]," (",allels.count[allel.num]," sequences)",sep=""),ylab="fraction of significant p-values", xlab="", xlim=c(0, min_FASTA_length), ylim=c(0,1)) # plot for percental number of mutations in 9er
+					par(fig=c(0,1,0.6,1))
+					legend("right", c("known epitopes","possible new epitopes", paste("# mutations in ", window_size,"er \nsliding window", sep="")),lty=c(1,1,1),lwd=c(1.5,1.5,1.5),col=c("red","darkgoldenrod1","black"),bty="n", cex=0.8, xjust=0)
+				}
+				par(fig=c(0,0.75,0.0,0.6), new=TRUE)
+			}
 			plot(p.values.norm, type="p", ylim=c(1.0,lowest_p_value), log="y", col="black", yaxt="n", pch=20, ylab="p-values", xlab="Alignment position", xlim=c(0, min_FASTA_length))
 			if (!pos_epi_plot){
-				mtext(paste(allels[allel.num],"(",allels.count[allel.num]," patient(s))",sep=""))
+				mtext(paste(allels[allel.num]," (",allels.count[allel.num]," sequences)",sep=""))
 			}
 			axis(side=2, at=vector_for_yaxis, labels=vector_for_yaxis)
 			corrected_opti <- optical.significance_level
@@ -896,27 +1100,9 @@ for(allel.num in 1:length(allels)){
 			}
 			lines(p.values.above_sig_level_norm, type="p", col = "red", pch=20) #points above a certain significance level
 			lines(p.values.above_star_level_norm, type="p", col = "red", pch=8) #stars above a certain significance level
-
-			all.pvals<-c(all.pvals,p.values.norm)
-			aa.all_level <- cbind(aa.all_level, aa_level)
-			all.aas <- cbind(all.aas, aa_values_m)
-			all.aa_1 <- cbind(all.aa_1, aa_1)
-			all.aa_2 <- cbind(all.aa_2, aa_2)
-			all.aa_3 <- cbind(all.aa_3, aa_3)
-			all.aa_4 <- cbind(all.aa_4, aa_4)
-			all.odds <- cbind(all.odds, odds.ratio.all)
-			above.star.all <- cbind(above.star.all, p.values.above_star_level_norm)
-			all.stattest <- cbind(all.stattest, stattest)
-#		}
+		}
   	}
 }
-		####BAYES - NOT AVAILABLE YET
-#if (statistical_correction == "Bayes"){
-#	all.pvals.corrected <- all.pvals
-#}else{
-	corrected.p_values <- p.adjust(p.values.all[,1], method = statistical_correction)
-	all.pvals.corrected <- corrected.p_values[which(p.values.all[,2] == "min")]
-#}
 
 #forth: write this epitope in a csv
 all.pos.epi <- subset(pos.epi.matrix, !duplicated(pos.epi.matrix))
@@ -927,16 +1113,15 @@ if (nrow(all.pos.epi)>1){
 	#print(all.pos.epi)
 }
 
-		####BAYES - NOT AVAILABLE YET
-#if (statistical_correction == "Bayes"){	
-#	result_output <- (matrix(all.pvals, ncol=sum(allels.count>patnum.threshold), dimnames=list(1:length(probs.max),allels[allels.count>patnum.threshold])))
-#
-#	all.pvals.c_output <- (matrix(all.pvals.corrected, ncol=sum(allels.count>patnum.threshold), dimnames=list(1:length(probs.max),allels[allels.count>patnum.threshold])))
-#}else{
-	result_output <- (matrix(all.pvals, ncol=sum(allels.count>patnum.threshold), dimnames=list(1:length(p.values.min),allels[allels.count>patnum.threshold])))
+		####BAYES - FACTOR
+if (bayes_factor){	
+	result_output <- (matrix(all.pvals, ncol=sum(allels.count>patnum.threshold), dimnames=list(1:length(probs.max),allels[allels.count>patnum.threshold])))
 
+	all.pvals.c_output <- (matrix(all.pvals.corrected, ncol=sum(allels.count>patnum.threshold), dimnames=list(1:length(probs.max),allels[allels.count>patnum.threshold])))
+}else{
+	result_output <- (matrix(all.pvals, ncol=sum(allels.count>patnum.threshold), dimnames=list(1:length(p.values.min),allels[allels.count>patnum.threshold])))
 	all.pvals.c_output <- (matrix(all.pvals.corrected, ncol=sum(allels.count>patnum.threshold), dimnames=list(1:length(p.values.min),allels[allels.count>patnum.threshold])))
-#}
+}
 
 result <- c()
 
@@ -948,41 +1133,39 @@ if (!is.null(reference_sequence) && !(reference_sequence == "") ){
 	}
 }
 
-		####BAYES - NOT AVAILABLE YET
-#if (statistical_correction == "Bayes"){	
-#	if (!is.null(reference_sequence) && !(reference_sequence == "") ){
-#		if (is.null(dim(all.aas))){
-#			result <- cbind(result_output, all.aas, all.stattest, as.character(subseq(ref_seq, j, j)))
-#		}
-#		else {	
-#			for (i in 1:ncol(result_output)){
-#				result <- cbind(result, result_output[,i], scale(result_output[,i],center=TRUE,scale=TRUE)[,1], all.aas[,i], all.stattest[,i], ref_row)
-#			}
-#		}
-#	}else{
-#		if (is.null(dim(all.aas))){
-#			result <- cbind(result_output, all.aas, all.stattest)
-#		}
-#		else {	
-#			for (i in 1:ncol(result_output)){
-#				result <- cbind(result, result_output[,i], scale(result_output[,i],center=TRUE,scale=TRUE)[,1], all.aas[,i], all.stattest[,i])
-#			}
-#		}
-#
-#
-#	}
-#
-#	colname <- c()
-#	if (!is.null(reference_sequence) && !(reference_sequence == "") ){
-#		for (i in 1:(ncol(result)/5)){
-#			colname <- c(colname, allels[allels.count>patnum.threshold][i], "z-scores", "AA with lowest p value", "Wilcox", "ref_seq")
-#		}
-#	}else{
-#		for (i in 1:(ncol(result)/4)){
-#			colname <- c(colname, allels[allels.count>patnum.threshold][i], "z-scores", "AA with lowest p value", "Wilcox")
-#		}
-#	}
-#}else{
+		####BAYES - FACTOR
+if (bayes_factor){	
+	if (!is.null(reference_sequence) && !(reference_sequence == "") ){
+		if (is.null(dim(all.aas))){
+			result <- cbind(result_output, all_sses, all.aas, all.odds, as.character(subseq(ref_seq, j, j)))
+		}
+		else {	
+			for (i in 1:ncol(result_output)){
+				result <- cbind(result, result_output[,i], scale(result_output[,i],center=TRUE,scale=TRUE)[,1], all_sses[,i], all.aas[,i], all.odds[,1], ref_row)
+			}
+		}
+	}else{
+		if (is.null(dim(all.aas))){
+			result <- cbind(result_output, all_sses, all.aas, all.odds)
+		}
+		else {	
+			for (i in 1:ncol(result_output)){
+				result <- cbind(result, result_output[,i], scale(result_output[,i],center=TRUE,scale=TRUE)[,1], all_sses[,i], all.aas[,i], all.odds[,1])
+			}
+		}
+	}
+
+	colname <- c()
+	if (!is.null(reference_sequence) && !(reference_sequence == "") ){
+		for (i in 1:(ncol(result)/6)){
+			colname <- c(colname, allels[allels.count>patnum.threshold][i], "z-scores", "standard error BF", "AA with lowest p value", "Odds ratio", "ref_seq")
+		}
+	}else{
+		for (i in 1:(ncol(result)/5)){
+			colname <- c(colname, allels[allels.count>patnum.threshold][i], "z-scores", "standard error BF", "AA with lowest p value", "Odds ratio")
+		}
+	}
+}else{
 
 	if (!is.null(reference_sequence) && !(reference_sequence == "") ){
 		if (is.null(dim(all.aas))){
@@ -1005,20 +1188,18 @@ if (!is.null(reference_sequence) && !(reference_sequence == "") ){
 
 
 	}
-#}
+	colname <- c()
 
-colname <- c()
-
-if (!is.null(reference_sequence) && !(reference_sequence == "") ){
-	for (i in 1:(ncol(result)/7)){
-		colname <- c(colname, allels[allels.count>patnum.threshold][i],"Corrected p-value", "z-scores", "AA with lowest p value", "Odds ratio", "Wilcox", "ref_seq")
-	}
-}else{
-	for (i in 1:(ncol(result)/6)){
-		colname <- c(colname, allels[allels.count>patnum.threshold][i],"Corrected p-value", "z-scores", "AA with lowest p value", "Odds ratio", "Wilcox")
+	if (!is.null(reference_sequence) && !(reference_sequence == "") ){
+		for (i in 1:(ncol(result)/7)){
+			colname <- c(colname, allels[allels.count>patnum.threshold][i],"Corrected p-value", "z-scores", "AA with lowest p value", "Odds ratio", "Phylogenetic bias", "ref_seq")
+		}
+	}else{
+		for (i in 1:(ncol(result)/6)){
+			colname <- c(colname, allels[allels.count>patnum.threshold][i],"Corrected p-value", "z-scores", "AA with lowest p value", "Odds ratio", "Phylogenetic bias")
+		}
 	}
 }
-
 
 colnames(result) <- colname
 
@@ -1039,12 +1220,12 @@ return (result)
 #"../inst/extdata/Example_aa.fasta",
 #"../inst/extdata/Example_epitopes_aa.csv",
 #"../inst/extdata/Example_HLA_binding_motifs_aa.csv",
-#save_name_pdf = "epitope_results.pdf",
-#save_name_csv = "epitope_results.csv",
+#save_name_pdf = "results.pdf",
+#save_name_csv = "results.csv",
 #dna = FALSE,
 #patnum_threshold = 1,
-#optical_significance_level = 0.01, 
-#star_significance_level = 0.5,
+#optical_significance_level = 0.05, 
+#star_significance_level = 0.001,
 #A11 = 10,
 #A12 = 11,
 #A21 = 13,
@@ -1054,8 +1235,11 @@ return (result)
 #B21 = 20,
 #B22 = 21,
 #multiple_testing_correction = "none",
+#bayes_factor=FALSE,
+#constant_dirichlet_precision_parameter=FALSE,
+#dirichlet_precision_parameter=200,
 #phylo_bias_check = TRUE,
-#matrix_for_phylo = "BLOSUM62",
+#offset = FALSE,
 #path_to_file_reference_sequence = "../inst/extdata/Example_reference_aa.fasta",
 #one_feature=FALSE,
 #window_size=9,
