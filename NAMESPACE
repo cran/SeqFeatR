@@ -15,6 +15,7 @@ export(
   tartan,
   orPlot,
   comparewithancestral,
+  smallmanhattan,
   getfreqs,
   volcanoplot
 )
@@ -31,16 +32,17 @@ import(
 )
 
 # Import smaller dependencies
-importFrom(plyr, adply)
-importFrom(phangorn, Ancestors)
-importFrom(phangorn, read.phyDat)
-importFrom(phangorn, pml)
-importFrom(phangorn, ancestral.pars)
-importFrom(qvalue, qvalue)
-importFrom(widgetTools, dropdownList)
-importFrom(calibrate, textxy)
-importFrom(coda, as.mcmc)
+importFrom("plyr", "adply")
+importFrom("phangorn", "Ancestors")
+importFrom("phangorn", "read.phyDat")
+importFrom("phangorn", "pml")
+importFrom("phangorn", "ancestral.pars")
+importFrom("qvalue", "qvalue")
+importFrom("widgetTools", "dropdownList")
+importFrom("calibrate", "textxy")
+importFrom("coda", "as.mcmc")
 importFrom("grDevices", "colorRampPalette", "dev.off", "pdf", "rgb")
+importFrom("scales", "trans_new", "log_breaks", "trans_breaks", "trans_format", "math_format")
 importFrom("graphics", "abline", "axis", "barplot", "box", "image",
              "layout", "legend", "lines", "mtext", "par", "plot")
 importFrom("stats", "cutree", "fisher.test", "p.adjust", "rgamma",

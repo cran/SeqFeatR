@@ -1,3 +1,17 @@
+SeqFeatR Version 0.2.2
+======================
+Changes:
+- new function! smallmanhattan produces small versions of the manhattan plot from
+  assocpoint
+- correction of OR values in assocpoint function
+
+
+SeqFeatR Version 0.2.1
+======================
+Changes:
+- phylo bias new
+
+
 SeqFeatR Version 0.2.0
 ======================
 Changes:

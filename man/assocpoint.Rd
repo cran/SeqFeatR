@@ -13,7 +13,7 @@
     B22, multiple_testing_correction = "bonferroni",
     bayes_factor = FALSE, constant_dirichlet_precision_parameter=FALSE,
     dirichlet_precision_parameter=20, phylo_bias_check = FALSE,
-    offset = FALSE, path_to_file_reference_sequence=NULL, one_feature=FALSE,
+    path_to_file_reference_sequence=NULL, one_feature=FALSE,
     window_size=9, epi_plot=FALSE)}
     
 \arguments{
@@ -45,7 +45,6 @@
   \item{constant_dirichlet_precision_parameter}{if Dirichlet precision parameter K is a fixed value. See details.}
   \item{dirichlet_precision_parameter}{the Dirichlet precision parameter for evaluation with Bayes factor. See details.}
   \item{phylo_bias_check}{simple mechanism to detect phylogenetic bias in data. See details.}
-  \item{offset}{offset for phylogenetic bias calculation. See details.}
   \item{path_to_file_reference_sequence}{Reference sequence for orientation. Will be
     added as extra column in the results. Not used in calculation itself.}
   \item{one_feature}{if there is only one feature. See details.}
@@ -78,14 +77,9 @@
 
   A phylogenetic bias check can be made if bayes_factor = FALSE and the result added as an extra column
   to the csv result file. For each alignment position with a p-value below a
-  user given threshold (optical_significance_level), 100 times <d_mean,feature> and <d_mean,no_feature> are calculated.
-  <d_mean,feature> = average distance of the sequences with feature,
-  <d_mean,no_feature> = average distance of the sequences without feature.
-  The user can add an offset for the calulation. If this is not given (offset = FALSE),
-  an offest of <d_sd,feature>, the standard deviation, is used.
-  The distance itself is calculated with "levenshtein".
-  A phylogenetic bias below 50 (50 times <d_mean,feature> + offset is lower than <d_mean,no_feature>)
-  is an indicator for a low bias, a value above 50 is an indicator for a high bias.
+  user given threshold (optical_significance_level), the mean distance of all
+  sequences with the mutation, which gave rise to this p-value, is calculated
+  and compared with the mean distance of all sequences.
 
   Features may be either a single feature, or HLA types, the latter indicated by four blocks in the FASTA
   comment lines. The positions of these blocks in the comment lines are
@@ -175,7 +169,6 @@ assocpoint(
 	constant_dirichlet_precision_parameter=TRUE,
 	dirichlet_precision_parameter=20,
 	phylo_bias_check=FALSE,
-        offset=FALSE,
 	path_to_file_reference_sequence=reference_input,
 	one_feature=FALSE,
 	window_size=9,

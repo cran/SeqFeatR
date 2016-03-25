@@ -23,6 +23,7 @@ create_sequence_graphic_is_running <- FALSE
 shared_mutations_is_running <- FALSE
 rewrite_shared_mutations_is_running <- FALSE
 get_freqs_is_running <- FALSE
+small_manhattan_is_running <- FALSE
 
 #----------------------------------------------------------------------------------------------------------------
 #Error handling---------------------------------------------------------------------------------------------------
@@ -217,13 +218,13 @@ generate_example_fasta <- function(){
 }
 
 generate_example_config <- function(){
-	config <- matrix(c("Number of patients threshold", "Height of horizontal bar", "Height of star level", "HLA-A1", "HLA-A2", "HLA-A3", "HLA-A4", "HLA-B1", "HLA-B2", "HLA-B3", "HLA-B4", "p-value correction", "Phylogenetic comparison", "offset", "offset_value", "Bayes Factor", "Constant Dirichlet precision parameter", "Dirichlet precision parameter", "One identifier", "window_size", "DNA", "p-value addon", "csv seperator", "number of cases", "position of odds.ratio", "position of p.values", "name for the y-axis label", "frequency", "position of amino acid", "maximum value of y-axis", "intervall of y-axis", "add color information", "bias", "Number of patients threshold_cm", "level for significance", "More than one core", "cmHLA-A1", "cmHLA-A2", "cmHLA-A3", "cmHLA-A4", "cmHLA-B1", "cmHLA-B2", "cmHLA-B3", "cmHLA-B4", "cmp-value correction", "Ratio in subtree", "cMlevel for significance", "space between blocks", "colors of the plot", "name positions", "names", "ticks", "column of first position in first file", "column of second position in first file", "column of values in first file", "column of first position in second file", "column of second position in second file", "column of values in second file", "threshold", "min_number_of_ele_in_tupel", "max_number_of_ele_in_tupel", "column", "column of position", "column of values", "column of aas", "smHLA-A1", "smHLA-A2", "smHLA-A3", "smHLA-A4", "smHLA-B1", "smHLA-B2", "smHLA-B3", "smHLA-B4", "Identifier", "With Allels", "cbWith Allels", "rw column of first position", "rw column of second position", "rw column of values", "rw csv seperator", "rw threshold", "pos_epi_plot", "Epi start", "Epi end", "Epitope Consensus", "gFHLA-A1", "gFHLA-A2", "gFHLA-A3", "gFHLA-A4", "gFHLA-B1", "gFHLA-B2", "gFHLA-B3", "gFHLA-B4", "1", "0.01", "0.5", "10", "11", "13", "14", "17", "18", "20", "21", "bonferroni", "0", "0", "10", "0", "1", "20", "0", "9", "0", "0.01", ";", "8", "6", "2", "2", "7", "NULL", "4", "0.2", "0", "5","1", "0.01", "0", "10", "11", "13", "14", "17", "18", "20", "21", "bonferroni", "7", "0.01", "5", "wheat, darkblue, black, green", "1,3", "S, F", "1,5", "4", "5", "7", "2", "3", "4", "0.2", "2", "2", "9", "1", "9", "12", "10", "11", "13", "14", "17", "18", "20", "21", "X4", "0", "0", "3", "4", "10", "\\t", "0.1", "TRUE", "1", "8", "LPDIQGNE", "10", "11", "13", "14", "17", "18", "20", "21"), ncol=2)
+	config <- matrix(c("Number of patients threshold", "Height of horizontal bar", "Height of star level", "HLA-A1", "HLA-A2", "HLA-A3", "HLA-A4", "HLA-B1", "HLA-B2", "HLA-B3", "HLA-B4", "p-value correction", "Phylogenetic comparison", "offset", "offset_value", "Bayes Factor", "Constant Dirichlet precision parameter", "Dirichlet precision parameter", "One identifier", "window_size", "DNA", "p-value addon", "csv seperator", "number of cases", "position of odds.ratio", "position of p.values", "name for the y-axis label", "frequency", "position of amino acid", "maximum value of y-axis", "intervall of y-axis", "add color information", "bias", "Number of patients threshold_cm", "level for significance", "More than one core", "cmHLA-A1", "cmHLA-A2", "cmHLA-A3", "cmHLA-A4", "cmHLA-B1", "cmHLA-B2", "cmHLA-B3", "cmHLA-B4", "cmp-value correction", "Ratio in subtree", "cMlevel for significance", "space between blocks", "colors of the plot", "name positions", "names", "ticks", "column of first position in first file", "column of second position in first file", "column of values in first file", "column of first position in second file", "column of second position in second file", "column of values in second file", "threshold", "min_number_of_ele_in_tupel", "max_number_of_ele_in_tupel", "column", "column of position", "column of values", "column of aas", "smHLA-A1", "smHLA-A2", "smHLA-A3", "smHLA-A4", "smHLA-B1", "smHLA-B2", "smHLA-B3", "smHLA-B4", "Identifier", "With Allels", "cbWith Allels", "rw column of first position", "rw column of second position", "rw column of values", "rw csv seperator", "rw threshold", "pos_epi_plot", "Epi start", "Epi end", "Epitope Consensus", "gFHLA-A1", "gFHLA-A2", "gFHLA-A3", "gFHLA-A4", "gFHLA-B1", "gFHLA-B2", "gFHLA-B3", "gFHLA-B4", "Feat", "corrected", "axis_break", "1", "0.01", "0.5", "10", "11", "13", "14", "17", "18", "20", "21", "bonferroni", "0", "0", "10", "0", "1", "20", "0", "9", "0", "0.01", ";", "8", "6", "2", "2", "7", "NULL", "4", "0.2", "0", "5","1", "0.01", "0", "10", "11", "13", "14", "17", "18", "20", "21", "bonferroni", "7", "0.01", "5", "wheat, darkblue, black, green", "1,3", "S, F", "1,5", "4", "5", "7", "2", "3", "4", "0.2", "2", "2", "9", "1", "9", "12", "10", "11", "13", "14", "17", "18", "20", "21", "X4", "0", "0", "3", "4", "10", "\\t", "0.1", "TRUE", "1", "8", "LPDIQGNE", "10", "11", "13", "14", "17", "18", "20", "21", "A2", "0", "1,20,40"), ncol=2)
 	save_file <- tclvalue(tkgetSaveFile(initialfile = "example_config.cfg", filetypes = "{{Config Files} {.cfg}} {{All files} *}"))
 	write.table(config, save_file, append = FALSE, quote = FALSE, sep = "=", eol = "\n", na = "NA", dec = ".", row.names = FALSE, col.names = FALSE, qmethod = c("escape", "double"), fileEncoding = "")
 }
 
 generate_example_config_wo_HLA <- function(){
-  config <- matrix(c("Number of patients threshold", "Height of horizontal bar", "Height of star level", "p-value correction", "Phylogenetic comparison", "offset", "offset_value", "Bayes Factor", "Constant Dirichlet precision parameter", "Dirichlet precision parameter", "One identifier", "window_size", "DNA", "p-value addon", "csv seperator", "number of cases", "position of odds.ratio", "position of p.values", "name for the y-axis label", "frequency", "position of amino acid", "maximum value of y-axis", "intervall of y-axis", "add color information", "bias", "Number of patients threshold_cm", "level for significance", "More than one core", "cmHLA-A1", "cmHLA-A2", "cmHLA-A3", "cmHLA-A4", "cmHLA-B1", "cmHLA-B2", "cmHLA-B3", "cmHLA-B4", "cmp-value correction", "Ratio in subtree", "cMlevel for significance", "space between blocks", "colors of the plot", "name positions", "names", "ticks", "column of first position in first file", "column of second position in first file", "column of values in first file", "column of first position in second file", "column of second position in second file", "column of values in second file", "threshold", "min_number_of_ele_in_tupel", "max_number_of_ele_in_tupel", "column", "column of position", "column of values", "column of aas", "smHLA-A1", "smHLA-A2", "smHLA-A3", "smHLA-A4", "smHLA-B1", "smHLA-B2", "smHLA-B3", "smHLA-B4", "Identifier", "With Allels", "cbWith Allels", "rw column of first position", "rw column of second position", "rw column of values", "rw csv seperator", "rw threshold", "pos_epi_plot", "Epi start", "Epi end", "Epitope Consensus", "1", "0.01", "0.5", "bonferroni", "0", "0", "10", "0", "1", "20", "0", "9", "0", "0.01", ";", "8", "6", "2", "2", "7", "NULL", "4", "0.2", "0", "5", "1", "0.01", "0", "10", "11", "13", "14", "17", "18", "20", "21", "bonferroni", "7", "0.01", "5", "wheat, darkblue, black, green", "1,3", "S, F", "1,5", "4", "5", "7", "2", "3", "4", "0.2", "2", "2", "9", "1", "9", "12", "10", "11", "13", "14", "17", "18", "20", "21", "X4", "0", "0", "3", "4", "10", "\\t", "0.1", "TRUE", "1", "8", "LPDIQGNE"), ncol=2)
+  config <- matrix(c("Number of patients threshold", "Height of horizontal bar", "Height of star level", "p-value correction", "Phylogenetic comparison", "offset", "offset_value", "Bayes Factor", "Constant Dirichlet precision parameter", "Dirichlet precision parameter", "One identifier", "window_size", "DNA", "p-value addon", "csv seperator", "number of cases", "position of odds.ratio", "position of p.values", "name for the y-axis label", "frequency", "position of amino acid", "maximum value of y-axis", "intervall of y-axis", "add color information", "bias", "Number of patients threshold_cm", "level for significance", "More than one core", "cmHLA-A1", "cmHLA-A2", "cmHLA-A3", "cmHLA-A4", "cmHLA-B1", "cmHLA-B2", "cmHLA-B3", "cmHLA-B4", "cmp-value correction", "Ratio in subtree", "cMlevel for significance", "space between blocks", "colors of the plot", "name positions", "names", "ticks", "column of first position in first file", "column of second position in first file", "column of values in first file", "column of first position in second file", "column of second position in second file", "column of values in second file", "threshold", "min_number_of_ele_in_tupel", "max_number_of_ele_in_tupel", "column", "column of position", "column of values", "column of aas", "smHLA-A1", "smHLA-A2", "smHLA-A3", "smHLA-A4", "smHLA-B1", "smHLA-B2", "smHLA-B3", "smHLA-B4", "Identifier", "With Allels", "cbWith Allels", "rw column of first position", "rw column of second position", "rw column of values", "rw csv seperator", "rw threshold", "pos_epi_plot", "Epi start", "Epi end", "Epitope Consensus", "Feat", "corrected", "axis_break", "1", "0.01", "0.5", "bonferroni", "0", "0", "10", "0", "1", "20", "0", "9", "0", "0.01", ";", "8", "6", "2", "2", "7", "NULL", "4", "0.2", "0", "5", "1", "0.01", "0", "10", "11", "13", "14", "17", "18", "20", "21", "bonferroni", "7", "0.01", "5", "wheat, darkblue, black, green", "1,3", "S, F", "1,5", "4", "5", "7", "2", "3", "4", "0.2", "2", "2", "9", "1", "9", "12", "10", "11", "13", "14", "17", "18", "20", "21", "X4", "0", "0", "3", "4", "10", "\\t", "0.1", "TRUE", "1", "8", "LPDIQGNE", "A2", "0", "1,20,40"), ncol=2)
   save_file <- tclvalue(tkgetSaveFile(initialfile = "example_config.cfg", filetypes = "{{Config Files} {.cfg}} {{All files} *}"))
   write.table(config, save_file, append = FALSE, quote = FALSE, sep = "=", eol = "\n", na = "NA", dec = ".", row.names = FALSE, col.names = FALSE, qmethod = c("escape", "double"), fileEncoding = "")
 }
@@ -279,7 +280,7 @@ about <- function(){
 }
 
 #Functions for the program start-------------------------------------------------------------------------------------------
-calculate_pos_epi <- function(tbn, cbValue01, cbValue_0e, textEntryC, textEntryD, textEntryE, textEntryH, textEntryH1, textEntryH2, textEntryH12, textEntryHB, textEntryH1B, textEntryH2B, textEntryH12B, textEntryIB, txt, icbValue01, textEntryH42B, cbValue_0eG1, cbValue_bayes_factor, cbValue_K, dirichlet_precision_parameter_textEntry, textEntryIB0, cbValue_off){
+calculate_pos_epi <- function(tbn, cbValue01, cbValue_0e, textEntryC, textEntryD, textEntryE, textEntryH, textEntryH1, textEntryH2, textEntryH12, textEntryHB, textEntryH1B, textEntryH2B, textEntryH12B, textEntryIB, txt, icbValue01, textEntryH42B, cbValue_0eG1, cbValue_bayes_factor, cbValue_K, dirichlet_precision_parameter_textEntry){
 	Require("Biostrings")
 	Require("plyr")
 	Require("plotrix")
@@ -304,12 +305,7 @@ calculate_pos_epi <- function(tbn, cbValue01, cbValue_0e, textEntryC, textEntryD
 			print ("Beware! Window size smaller than 2! Will be set to 2")
 			tclvalue(textEntryH42B) <- 2
 		}
-		if (as.logical(as.numeric(cbValue_off))) {
-			offset <- as.numeric(tclvalue(textEntryIB0))
-		}else{
-			offset <- FALSE
-		}
-		tryCatch({result <- assocpoint(loaded_files[1,1,1], loaded_files[1,2,1], loaded_files[1,3,1], save_name_epi, save_name_epi_csv, as.numeric(tclvalue(cbValue01)), as.numeric(tclvalue(textEntryC)), as.numeric(tclvalue(textEntryD)), as.numeric(tclvalue(textEntryE)), as.numeric(tclvalue(textEntryH)), as.numeric(tclvalue(textEntryH1)), as.numeric(tclvalue(textEntryH2)), as.numeric(tclvalue(textEntryH12)), as.numeric(tclvalue(textEntryHB)), as.numeric(tclvalue(textEntryH1B)), as.numeric(tclvalue(textEntryH2B)), as.numeric(tclvalue(textEntryH12B)), tclvalue(textEntryIB), as.logical(as.numeric(cbValue_bayes_factor)), as.logical(as.numeric(cbValue_K)), as.numeric(tclvalue(dirichlet_precision_parameter_textEntry)), as.numeric(tclvalue(cbValue_0e)), offset, loaded_files[1,4,1], as.logical(as.numeric(icbValue01)), as.numeric(tclvalue(textEntryH42B)), as.logical(as.numeric(tclvalue(cbValue_0eG1))) )}, error = function(err) {tkmessageBox(title="An error has occured!",message=paste("No calculation done\n", err),icon="error",type="ok")})
+		tryCatch({result <- assocpoint(loaded_files[1,1,1], loaded_files[1,2,1], loaded_files[1,3,1], save_name_epi, save_name_epi_csv, as.numeric(tclvalue(cbValue01)), as.numeric(tclvalue(textEntryC)), as.numeric(tclvalue(textEntryD)), as.numeric(tclvalue(textEntryE)), as.numeric(tclvalue(textEntryH)), as.numeric(tclvalue(textEntryH1)), as.numeric(tclvalue(textEntryH2)), as.numeric(tclvalue(textEntryH12)), as.numeric(tclvalue(textEntryHB)), as.numeric(tclvalue(textEntryH1B)), as.numeric(tclvalue(textEntryH2B)), as.numeric(tclvalue(textEntryH12B)), tclvalue(textEntryIB), as.logical(as.numeric(cbValue_bayes_factor)), as.logical(as.numeric(cbValue_K)), as.numeric(tclvalue(dirichlet_precision_parameter_textEntry)), as.numeric(tclvalue(cbValue_0e)), loaded_files[1,4,1], as.logical(as.numeric(icbValue01)), as.numeric(tclvalue(textEntryH42B)), as.logical(as.numeric(tclvalue(cbValue_0eG1))) )}, error = function(err) {tkmessageBox(title="An error has occured!",message=paste("No calculation done\n", err),icon="error",type="ok")})
 		old.option <- (getOption("width", default = NULL))
 		options(width=2000)
 		text <- paste(capture.output(print(result)),collapse="\n")
@@ -561,7 +557,7 @@ calculate_q_value <- function(tbn3, txt){
 	tkconfigure(tbn3,cursor="arrow")
 }
 
-shared_mutations <- function(tbn5, txt, smtextEntryA, smtextEntryB, smtextEntryC, smtextEntryD, smtextEntryD2, smtextEntryE, smtextEntryF, smtextEntryH, smtextEntryH1, smtextEntryH2, smtextEntryH12, smtextEntryHB, smtextEntryH1B, smtextEntryH2B, smtextEntryH12B, icbValue01, smtextEntryidet){
+shared_mutations <- function(tbn5, txt, smtextEntryA, smtextEntryB, smtextEntryC, cbValue_0sM, cbValue_0sM2, smtextEntryE, smtextEntryF, smtextEntryH, smtextEntryH1, smtextEntryH2, smtextEntryH12, smtextEntryHB, smtextEntryH1B, smtextEntryH2B, smtextEntryH12B, icbValue01, smtextEntryidet){
 	Require("Biostrings")
 	Require("parallel")
 	loaded_files <- .GlobalEnv[["loaded_files"]]
@@ -578,7 +574,7 @@ shared_mutations <- function(tbn5, txt, smtextEntryA, smtextEntryB, smtextEntryC
 		if (!nchar(save_name_sm)){
     			tkmessageBox(message="No file was selected!")
 		}
-    		tryCatch({result_sm <- assoctuple(loaded_files[1,1,8], loaded_files[1,2,8], as.numeric(tclvalue(smtextEntryA)), as.numeric(tclvalue(smtextEntryB)), as.numeric(tclvalue(smtextEntryC)), save_name_sm, as.numeric(tclvalue(smtextEntryD)), as.numeric(tclvalue(smtextEntryD2)), as.numeric(tclvalue(smtextEntryE)), as.numeric(tclvalue(smtextEntryF)), as.numeric(tclvalue(smtextEntryH)), as.numeric(tclvalue(smtextEntryH1)), as.numeric(tclvalue(smtextEntryH2)), as.numeric(tclvalue(smtextEntryH12)), as.numeric(tclvalue(smtextEntryHB)), as.numeric(tclvalue(smtextEntryH1B)), as.numeric(tclvalue(smtextEntryH2B)), as.numeric(tclvalue(smtextEntryH12B)), as.logical(as.numeric(icbValue01)), as.character(tclvalue(smtextEntryidet)) )}, error = function(err) {tkmessageBox(title="An error has occured!",message=paste("No calculation done\n", err),icon="error",type="ok")})
+    		tryCatch({result_sm <- assoctuple(loaded_files[1,1,8], loaded_files[1,2,8], as.numeric(tclvalue(smtextEntryA)), as.numeric(tclvalue(smtextEntryB)), as.numeric(tclvalue(smtextEntryC)), save_name_sm, as.numeric(tclvalue(cbValue_0sM)), as.numeric(tclvalue(cbValue_0sM2)), as.numeric(tclvalue(smtextEntryE)), as.numeric(tclvalue(smtextEntryF)), as.numeric(tclvalue(smtextEntryH)), as.numeric(tclvalue(smtextEntryH1)), as.numeric(tclvalue(smtextEntryH2)), as.numeric(tclvalue(smtextEntryH12)), as.numeric(tclvalue(smtextEntryHB)), as.numeric(tclvalue(smtextEntryH1B)), as.numeric(tclvalue(smtextEntryH2B)), as.numeric(tclvalue(smtextEntryH12B)), as.logical(as.numeric(icbValue01)), as.character(tclvalue(smtextEntryidet)) )}, error = function(err) {tkmessageBox(title="An error has occured!",message=paste("No calculation done\n", err),icon="error",type="ok")})
 		old.option <- (getOption("width", default = NULL))
 		options(width=2000)
 		text <- paste(capture.output(print (read.csv2(result_sm), width="200")),collapse="\n")
@@ -642,7 +638,7 @@ get_freqs <- function(tbn3, gFtextEntryC, gFtextEntryD, gFtextEntryF, gFtextEntr
     			tkmessageBox(message="No file was selected!")
 		}
 		save_name_gFp <- tclvalue(tkgetSaveFile(initialfile="Freqs.png",filetypes="{{png Files} {.png}} {{All files} *}"))
-		if (!nchar(save_name_gF)){
+		if (!nchar(save_name_gFp)){
     			tkmessageBox(message="No file was selected!")
 		}
     		tryCatch({result_gF <- getfreqs(loaded_files[1,1,11], save_name_gF, save_name_gFp,  as.numeric(tclvalue(gFtextEntryC)), as.numeric(tclvalue(gFtextEntryD)), loaded_files[1,2,11], as.numeric(tclvalue(gFtextEntryF)), as.numeric(tclvalue(gFtextEntryH)), as.numeric(tclvalue(gFtextEntryH1)), as.numeric(tclvalue(gFtextEntryH2)), as.numeric(tclvalue(gFtextEntryH12)), as.numeric(tclvalue(gFtextEntryHB)), as.numeric(tclvalue(gFtextEntryH1B)), as.numeric(tclvalue(gFtextEntryH2B)), as.numeric(tclvalue(gFtextEntryH12B)) )}, error = function(err) {tkmessageBox(title="An error has occured!",message=paste("No calculation done\n", err),icon="error",type="ok")})
@@ -658,11 +654,44 @@ get_freqs <- function(tbn3, gFtextEntryC, gFtextEntryD, gFtextEntryF, gFtextEntr
 	tkconfigure(tbn3,cursor="arrow")
 }
 
+small_manhattan <- function(tbn3, sMtextEntryC, cbValue_0sM, sMtextEntryF, txt){
+	Require("ggplot2")
+	Require("scales")
+	loaded_files <- .GlobalEnv[["loaded_files"]]
+	tkconfigure(tbn3,cursor="watch")
+	if (!small_manhattan_is_running){
+		result_q <- c()
+		if (data.class(result<-try(find.package("SeqFeatR"),TRUE))=="try-error"){
+			source("smallmanhattan.R")
+		}
+		small_manhattan_is_running <- TRUE
+		tryCatch({sM_wo_set_input_file_assoc_result(loaded_files[1,1,12])}, error = function(err) {tkmessageBox(title="An error has occured!",message=geterrmessage(),icon="error",type="ok")})
+		save_name_sM <- tclvalue(tkgetSaveFile(initialfile="smallManhattan.png",filetypes="{{png Files} {.png}} {{All files} *}"))
+		if (!nchar(save_name_sM)){
+    			tkmessageBox(message="No file was selected!")
+		}
+		save_name_sMs <- tclvalue(tkgetSaveFile(initialfile="smallManhattan.svg",filetypes="{{svg Files} {.svg}} {{All files} *}"))
+		if (!nchar(save_name_sMs)){
+    			tkmessageBox(message="No file was selected!")
+		}
+    		tryCatch({result_sM <- smallmanhattan(loaded_files[1,1,12], save_name_sM, save_name_sMs,  as.character(tclvalue(sMtextEntryC)), as.logical(as.numeric(cbValue_0sM)), as.character(tclvalue(sMtextEntryF)) )}, error = function(err) {tkmessageBox(title="An error has occured!",message=paste("No calculation done\n", err),icon="error",type="ok")})
+		old.option <- (getOption("width", default = NULL))
+		options(width=2000)
+		text <- paste(capture.output(print(result_sM)),collapse="\n")
+		options(width=old.option)
+		tkconfigure(txt, state="normal")
+		tryCatch({tkinsert(txt,"end",text)}, error = function(err) {})
+		tkconfigure(txt, state="disabled")
+		small_manhattan_is_running <- FALSE
+	}
+	tkconfigure(tbn3,cursor="arrow")
+}
+
 #----------------------------------------------------------
 SeqFeatR_GUI <- structure(function(
 	### SeqFeatR GUI to handle the program without command line
 	){
-loaded_files <- array(rep(0, 44), dim=c(1,4,11), dimnames = list("name",c("specific file_1","specific file_2","specific file_3", "specific file_4"),c("pos_epi", "co-mut", "q-value", "pos_e_cal", "graphics_co_mut", "founder_elim", "two_side", "shared_mutations", "co_mut_graphics_both", "rewrite_shared_mutations", "get_freqs")))
+loaded_files <- array(rep(0, 48), dim=c(1,4,12), dimnames = list("name",c("specific file_1","specific file_2","specific file_3", "specific file_4"),c("pos_epi", "co-mut", "q-value", "pos_e_cal", "graphics_co_mut", "founder_elim", "two_side", "shared_mutations", "co_mut_graphics_both", "rewrite_shared_mutations", "get_freqs", "small_manhattan")))
 .GlobalEnv[["loaded_files"]] <- loaded_files
 
 if(length(system.file("extdata", "config.cfg", package="SeqFeatR")) > 1){
@@ -990,24 +1019,6 @@ if (length(con[which(con[,1]=="Phylogenetic comparison"),2]) > 0){
 tkconfigure(cb0e,variable=cbValue_0e)
 tkgrid(tklabel(epi,text="Check for phylogenetic bias?"),cb0e, sticky="snew")
 
-pElabelTextIB0 <- tclVar("Offset: ")
-pElabelIB0 <- tklabel(epi,text=tclvalue(pElabelTextIB0))
-if (length(con[which(con[,1]=="offset_value"),2]) > 0){
-	textEntryIB0 <- tclVar(con[which(con[,1]=="offset_value"),2])
-}else{
-	textEntryIB0 <- tclVar("")
-}
-textEntryWidgetIB0 <- tkentry(epi,textvariable=textEntryIB0)
-cboff <- tkcheckbutton(epi,command=function()check_offset(cbValu_off <- as.character(tclvalue(cbValue_off)), textEntryWidgetIB0))
-if (length(con[which(con[,1]=="offset"),2]) > 0){
-	cbValue_off <- tclVar(con[which(con[,1]=="offset"),2])
-}else{
-	cbValue_off <- tclVar("0")
-}
-tkconfigure(cboff,variable=cbValue_off)
-tkconfigure(textEntryWidgetIB0, state="disabled")
-tkgrid(pElabelIB0, cboff, textEntryWidgetIB0)
-
 cbbayes_factor <- tkcheckbutton(epi,command=function()check_bayes_factor(cbValue_bayes_factor <- as.character(tclvalue(cbValue_bayes_factor)), cbValue_K <- as.character(tclvalue(cbValue_K)), textEntryWidgetdirichlet_precision_parameter))
 if (length(con[which(con[,1]=="Bayes factor"),2]) > 0){
 	cbValue_bayes_factor <- tclVar(con[which(con[,1]=="Bayes factor"),2])
@@ -1050,10 +1061,9 @@ tkgrid.configure(pElabel1H,sticky="w")
 tkgrid.configure(pElabel1HB,sticky="w")
 tkgrid.configure(pElabel1IB,sticky="w")
 tkgrid.configure(pElabelH42B,sticky="w")
-tkgrid.configure(pElabelIB0,sticky="w")
 tkgrid.configure(pElabel1dirichlet_precision_parameter,sticky="w")
 
-OK.bute1 <- tkbutton(epi,text="Start", foreground = "red",command=function()calculate_pos_epi(tbn, cbValue01, cbValue_0e, textEntryC, textEntryD, textEntryE, textEntryH, textEntryH1, textEntryH2, textEntryH12, textEntryHB, textEntryH1B, textEntryH2B, textEntryH12B, textEntryIB, txt, as.character(tclvalue(icbValue01)), textEntryH42B, cbValue_0eG1, as.character(tclvalue(cbValue_bayes_factor)), as.character(tclvalue(cbValue_K)), dirichlet_precision_parameter_textEntry, textEntryIB0, as.character(tclvalue(cbValue_off)) ))
+OK.bute1 <- tkbutton(epi,text="Start", foreground = "red",command=function()calculate_pos_epi(tbn, cbValue01, cbValue_0e, textEntryC, textEntryD, textEntryE, textEntryH, textEntryH1, textEntryH2, textEntryH12, textEntryHB, textEntryH1B, textEntryH2B, textEntryH12B, textEntryIB, txt, as.character(tclvalue(icbValue01)), textEntryH42B, cbValue_0eG1, as.character(tclvalue(cbValue_bayes_factor)), as.character(tclvalue(cbValue_K)), dirichlet_precision_parameter_textEntry ))
 tkgrid(OK.bute1)
 
 tkgrid.configure(button.widget_epi1, column=8, sticky="e")
@@ -1071,8 +1081,6 @@ tkgrid.configure(textEntryWidgetD, column=2, columnspan=6)
 tkgrid.configure(textEntryWidgetE, column=2, columnspan=6)
 tkgrid.configure(ddb, column=2, columnspan=6)
 tkgrid.configure(textEntryWidgetH42B, column=2, columnspan=6)
-tkgrid.configure(cboff, column=2, columnspan=1)
-tkgrid.configure(textEntryWidgetIB0, column=3, columnspan=5)
 tkgrid.configure(cb0eG1, column=2, columnspan=6)
 tkgrid.configure(cb0e, column=2, columnspan=6)
 tkgrid.configure(cbbayes_factor, column=2, columnspan=6)
@@ -1525,21 +1533,21 @@ tkgrid(smlabel1C, smtextEntryWidgetC)
 smlabelTextD <- tclVar("Column nr. of identifier *:")
 smlabel1D <- tklabel(sm,text=tclvalue(smlabelTextD))
 if (length(con[which(con[,1]=="column"),2]) > 0){
-	smtextEntryD <- tclVar(con[which(con[,1]=="column"),2])
+	cbValue_0sM <- tclVar(con[which(con[,1]=="column"),2])
 }else{
-	smtextEntryD <- tclVar("")
+	cbValue_0sM <- tclVar("")
 }
-smtextEntryWidgetD <- tkentry(sm,textvariable=smtextEntryD)
+smtextEntryWidgetD <- tkentry(sm,textvariable=cbValue_0sM)
 tkgrid(smlabel1D, smtextEntryWidgetD)
 
 smlabelTextD2 <- tclVar("Column nr. of alignment pos *:")
 smlabel1D2 <- tklabel(sm,text=tclvalue(smlabelTextD2))
 if (length(con[which(con[,1]=="column of position"),2]) > 0){
-	smtextEntryD2 <- tclVar(con[which(con[,1]=="column of position"),2])
+	cbValue_0sM2 <- tclVar(con[which(con[,1]=="column of position"),2])
 }else{
-	smtextEntryD2 <- tclVar("")
+	cbValue_0sM2 <- tclVar("")
 }
-smtextEntryWidgetD2 <- tkentry(sm,textvariable=smtextEntryD2)
+smtextEntryWidgetD2 <- tkentry(sm,textvariable=cbValue_0sM2)
 tkgrid(smlabel1D2, smtextEntryWidgetD2)
 
 smlabelTextE <- tclVar("Column nr. of p-values *:")
@@ -1637,7 +1645,7 @@ smtextEntryWidgetX <- tkentry(sm,textvariable=smtextEntryidet)
 tkgrid(smlabelX, smtextEntryWidgetX)
 tkconfigure(smtextEntryWidgetX, state="disabled")
 
-OK.but4 <- tkbutton(sm,text="Start", foreground = "red",command=function()shared_mutations(tbn2, txt, smtextEntryA, smtextEntryB, smtextEntryC, smtextEntryD, smtextEntryD2, smtextEntryE, smtextEntryF, smtextEntryH, smtextEntryH1, smtextEntryH2, smtextEntryH12, smtextEntryHB, smtextEntryH1B, smtextEntryH2B, smtextEntryH12B, as.character(tclvalue(icbValue01)), smtextEntryidet ))
+OK.but4 <- tkbutton(sm,text="Start", foreground = "red",command=function()shared_mutations(tbn2, txt, smtextEntryA, smtextEntryB, smtextEntryC, cbValue_0sM, cbValue_0sM2, smtextEntryE, smtextEntryF, smtextEntryH, smtextEntryH1, smtextEntryH2, smtextEntryH12, smtextEntryHB, smtextEntryH1B, smtextEntryH2B, smtextEntryH12B, as.character(tclvalue(icbValue01)), smtextEntryidet ))
 tkgrid(OK.but4)
 
 ###set left:
@@ -1961,6 +1969,71 @@ tkpack(txt5,expand='yes',fill='both')
 tkpack(xscr5, side="bottom", fill="x")
 sf3 <- tkcanvas(txt5, background="white")
 tkwindow.create(txt5,'end', window=sf3)
+
+# small manhattan
+sMA <- tkframe(sf3,relief="groove",borderwidth=2)
+tkgrid(sMA, sticky="e")
+
+headingsMA <- tklabel(sMA,text="Small manhattan plot", background="#FFCC99")
+tkgrid(headingsMA, sticky="snew", columnspan=5)
+
+button.widget_epi1 <- tkbutton(sMA,text="Select csv file",command=function()getcsvfile(sMAlabelText1, 12, 1))
+sMAlabelText <- tclVar("Result from assoc point *: ")
+sMAlabel1 <- tklabel(sMA,text=tclvalue(sMAlabelText))
+tkconfigure(sMAlabel1,textvariable=sMAlabelText)
+
+sMAlabelText1 <- tclVar("")
+sMAlabel2 <- tklabel(sMA,text=tclvalue(sMAlabelText1))
+tkconfigure(sMAlabel2,textvariable=sMAlabelText1)
+tkgrid(sMAlabel1, sMAlabel2, button.widget_epi1)
+
+sMAlabelTextC <- tclVar("Feature *: ")
+sMAlabel1C <- tklabel(sMA,text=tclvalue(sMAlabelTextC))
+if (length(con[which(con[,1]=="Feat"),2]) > 0){
+	sMAtextEntryC <- tclVar(con[which(con[,1]=="Feat"),2])
+}else{
+	sMAtextEntryC <- tclVar("")
+}
+sMAtextEntryWidgetC <- tkentry(sMA,textvariable=sMAtextEntryC)
+tkgrid(sMAlabel1C, sMAtextEntryWidgetC)
+
+cb0sMA <- tkcheckbutton(sMA)
+if (length(con[which(con[,1]=="corrected"),2]) > 0){
+	cbValue_0sMA <- tclVar(con[which(con[,1]=="corrected"),2])
+}else{
+	cbValue_0sMA <- tclVar("0")
+}
+tkconfigure(cb0sMA,variable=cbValue_0sMA)
+tkgrid(tklabel(sMA,text="Use corrected values?"),cb0sMA, sticky="snew")
+
+sMAlabelTextF <- tclVar("x-axis-breaks *: ")
+sMAlabel1F <- tklabel(sMA,text=tclvalue(sMAlabelTextF))
+if (length(con[which(con[,1]=="axis_breaks"),2]) > 0){
+	sMAtextEntryF <- tclVar(con[which(con[,1]=="axis_breaks"),2])
+}else{
+	sMAtextEntryF <- tclVar("")
+}
+sMAtextEntryWidgetF <- tkentry(sMA,textvariable=sMAtextEntryF)
+tkgrid(sMAlabel1F, sMAtextEntryWidgetF)
+
+OK.butsMA <- tkbutton(sMA,text="Start", foreground = "red",command=function()small_manhattan(tbn3, sMAtextEntryC, cbValue_0sMA, sMAtextEntryF, txt))
+tkgrid(OK.butsMA)
+
+###set left:
+tkgrid.configure(sMAlabel1, sticky="w")
+
+tkgrid.configure(sMAlabel1C, sticky="w")
+tkgrid.configure(sMAlabel1F, sticky="w")
+
+tkgrid.configure(sMAlabel2, column=2, columnspan=2, sticky="w")
+tkgrid.configure(sMAtextEntryWidgetC, column=2, columnspan=2)
+tkgrid.configure(sMAtextEntryWidgetF, column=2, columnspan=2)
+
+tkgrid.configure(cb0sMA, column=2, columnspan=6)
+tkgrid.configure(OK.butsMA, column=4, sticky="e")
+tkgrid.configure(button.widget_epi1, column=4, sticky="e")
+
+#Get frequencies###-----------------------
 
 gF <- tkframe(sf3,relief="groove",borderwidth=2)
 tkgrid(gF, sticky="snew")
@@ -2565,8 +2638,8 @@ tk2tip(rsmtextEntryWidgetE5, "Column number with first sequence position.")
 tk2tip(rsmtextEntryWidgetE6, "Column number with second sequence position.")
 tk2tip(rsmtextEntryWidgetE7, "Column number with p-values.")
 
-tk2tip(gFtextEntryWidgetC, "starting position of the epitope in the alignment.")
-tk2tip(gFtextEntryWidgetD, "ending position of the epitope in the alignment.")
+tk2tip(gFtextEntryWidgetC, "Starting position of the epitope in the alignment.")
+tk2tip(gFtextEntryWidgetD, "Ending position of the epitope in the alignment.")
 tk2tip(gFtextEntryWidgetF, "The minimum number of patients of one HLA type to consider in the calculation.")
 tk2tip(gFtextEntryWidgetH, "The position of the start of the first feature A allele in the description block of the FASTA file.")
 tk2tip(gFtextEntryWidgetH1, "The position of the end of the first feature A allele in the description block of the FASTA file.")
@@ -2576,6 +2649,10 @@ tk2tip(gFtextEntryWidgetHB, "The position of the start of the first feature B al
 tk2tip(gFtextEntryWidgetH1B, "The position of the end of the first feature B allele in the description block of the FASTA file.")
 tk2tip(gFtextEntryWidgetH2B, "The position of the start of the second feature B allele in the description block of the FASTA file.")
 tk2tip(gFtextEntryWidgetH12B, "The position of the end of the second feature B allele in the description block of the FASTA file.")
+
+tk2tip(sMAtextEntryWidgetC, "Feature for which the plot should be made.")
+tk2tip(cb0sMA, "Should the corrected values be used?")
+tk2tip(sMAtextEntryWidgetF, "The x-axis-breaks.")
 
 
 #---------------------------------------------------------
@@ -2601,8 +2678,6 @@ z$textEntryH2B <- list(textEntryH2B, "HLA-B3")
 z$textEntryH12B <- list(textEntryH12B, "HLA-B4")
 z$textEntryIB <- list(textEntryIB, "p-value correction")
 #z$textEntryKIB <- list(textEntryKIB, "Matrix for phylo")
-z$cbValue_off <- list(cbValue_off, "offset")
-z$textEntryIBO <- list(textEntryIB0, "offset_value")
 z$dirichlet_precision_parameter_textEntry<- list(dirichlet_precision_parameter_textEntry, "Dirichlet precision parameter")
 z$icbValue01 <- list(icbValue01, "One identifier")
 z$textEntryH42B <- list(textEntryH42B, "window_size")
@@ -2646,8 +2721,8 @@ z$TcMtextEntryE0 <- list(TcMtextEntryE0, "column of values in second file")
 z$smtextEntryA <- list(smtextEntryA, "threshold")
 z$smtextEntryB <- list(smtextEntryB, "min_number_of_ele_in_tupel")
 z$smtextEntryC <- list(smtextEntryC, "max_number_of_ele_in_tupel")
-z$smtextEntryD <- list(smtextEntryD, "column")
-z$smtextEntryD2 <- list(smtextEntryD2, "column of position")
+z$cbValue_0sM <- list(cbValue_0sM, "column")
+z$cbValue_0sM2 <- list(cbValue_0sM2, "column of position")
 z$smtextEntryE <- list(smtextEntryE, "column of values")
 z$smtextEntryF <- list(smtextEntryF, "column of aas")
 z$smtextEntryH <- list(smtextEntryH, "smHLA-A1")
@@ -2675,6 +2750,9 @@ z$gFtextEntryHB <- list(gFtextEntryHB, "gFHLA-B1")
 z$gFtextEntryH1B <- list(gFtextEntryH1B, "gFHLA-B2")
 z$gFtextEntryH2B <- list(gFtextEntryH2B, "gFHLA-B3")
 z$gFtextEntryH12B <- list(gFtextEntryH12B, "gFHLA-B4")
+z$sMAtextEntryC <- list(sMAtextEntryC, "Feat")
+z$cbValue_0sMA <- list(cbValue_0sMA, "corrected")
+z$sMAtextEntryF <- list(sMAtextEntryF, "axis_breaks")
 
 .GlobalEnv[["z"]] <- z
 #---------------------------------------------------------

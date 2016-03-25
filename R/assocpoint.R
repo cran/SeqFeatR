@@ -420,8 +420,6 @@ assocpoint <- structure(function(#Find possible epitopes
 	### The Dirichlet precision parameter for evaluation with Bayes factor. See details.
 	phylo_bias_check = FALSE,
 	### if the sequences with the certain trait and Amino Acid with the lowest p.value should be compared in sequence similarity with all sequences. See details.
-	offset = FALSE,
-	### offest for phylo bias check
 	path_to_file_reference_sequence = NULL,
 	### Reference sequence for better comparison of results
 	one_feature=FALSE,
@@ -433,7 +431,7 @@ assocpoint <- structure(function(#Find possible epitopes
 	#print (path_to_file_reference_sequence)
 	#print (multiple_testing_correction)
 	#print (path_to_file_m)
-	result <- find_possible_epitopes_inner(path_to_file_sequence_alignment, path_to_file_known_epitopes, path_to_file_binding_motifs, save_name_pdf, save_name_csv, dna, patnum_threshold, optical_significance_level, star_significance_level, optical_significance_level, optical_significance_level, A11, A12, A21, A22, B11, B12, B21, B22, multiple_testing_correction, bayes_factor, constant_dirichlet_precision_parameter, dirichlet_precision_parameter, phylo_bias_check, offset, path_to_file_reference_sequence, one_feature, window_size, epi_plot)
+	result <- find_possible_epitopes_inner(path_to_file_sequence_alignment, path_to_file_known_epitopes, path_to_file_binding_motifs, save_name_pdf, save_name_csv, dna, patnum_threshold, optical_significance_level, star_significance_level, optical_significance_level, optical_significance_level, A11, A12, A21, A22, B11, B12, B21, B22, multiple_testing_correction, bayes_factor, constant_dirichlet_precision_parameter, dirichlet_precision_parameter, phylo_bias_check, path_to_file_reference_sequence, one_feature, window_size, epi_plot)
 	return(result)
 
 },ex=function(){
@@ -467,7 +465,7 @@ assocpoint <- structure(function(#Find possible epitopes
  pos_epi_plot=FALSE)
 })
 
-find_possible_epitopes_inner <- function(path_to_file_s = NULL, path_to_file_p = NULL, path_to_file_m = NULL, save_name, save_name_csv, dna = FALSE, patnum.threshold = 1, optical.significance_level = 0.05, star.significance_level = 0.001, pot.epitope_level = 0.05, window_threshold = 0.05, A11, A12, A21, A22, B11, B12, B21, B22, statistical_correction = "bonferroni", bayes_factor, constant_dirichlet_precision_parameter, dirichlet_precision_parameter=20, with_phylogenetic_comparison = FALSE, offset, reference_sequence = NULL, one_ident, window_size, pos_epi_plot=FALSE){
+find_possible_epitopes_inner <- function(path_to_file_s = NULL, path_to_file_p = NULL, path_to_file_m = NULL, save_name, save_name_csv, dna = FALSE, patnum.threshold = 1, optical.significance_level = 0.05, star.significance_level = 0.001, pot.epitope_level = 0.05, window_threshold = 0.05, A11, A12, A21, A22, B11, B12, B21, B22, statistical_correction = "bonferroni", bayes_factor, constant_dirichlet_precision_parameter, dirichlet_precision_parameter=20, with_phylogenetic_comparison = FALSE, reference_sequence = NULL, one_ident, window_size, pos_epi_plot=FALSE){
 
 	if (!is.null(reference_sequence) && reference_sequence == 0){
 		reference_sequence <- NULL
@@ -510,13 +508,10 @@ find_possible_epitopes_inner <- function(path_to_file_s = NULL, path_to_file_p =
 
 	if (with_phylogenetic_comparison){
 		StringSetsequences_p <- .GlobalEnv[["StringSetsequences"]]
-		StringSetsequences <- sample(StringSetsequences_p, min(100,length(StringSetsequences_p)))
+		StringSetsequences <- StringSetsequences_p
 		counter <- 0
 		dist.vec <- dist.vec <- stringDist(StringSetsequences, method = "levenshtein")
 		mean_dist_all <- mean(dist.vec)
-		distance_matrix <- matrix(dist.vec, ncol=1)
-		cat (mean(distance_matrix[1]), "\n", file="distances.txt", append=TRUE)
-		cat (sd(distance_matrix[1]), "\n", file="distances.txt", append=TRUE)
 	}
 
 #find the shortest length of FASTA String, if the sequences are of different length
@@ -619,6 +614,7 @@ length(p.values.all.all) <- length(allels)
 .GlobalEnv[["p.values.all.all"]] <- p.values.all.all
 
 for(allel.num in 1:length(allels)){
+	#print (allels[allel.num])
   	if(allels.count[allel.num]>patnum.threshold){
 		#if (allels[allel.num] == "A24"){
 		print (allel.num)
@@ -646,6 +642,7 @@ for(allel.num in 1:length(allels)){
 		# for each letter in FASTA:
    		for (j in 1:min_FASTA_length){
 			#print (j)
+			#mir <- occ
       			#for each point in sequence do the following:
       			#for certain allel calculate fisher's exact test's minimum p-value among the tests for all amino acids (aa/!aa ; allel/!allel)
       			p.values <- c()
@@ -663,6 +660,8 @@ for(allel.num in 1:length(allels)){
 			aacids <- unique(mat[,1])
 			subset_has_allel <- mat[has_allel]
 			subset_not_has_allel <- mat[has_no_allel]
+			#print (subset_has_allel)
+			#print (subset_not_has_allel)
 			#count from tabel for each FASTA letter and then each aa for the allel, the occurence
 			# 1,1 is: occurency of aa in sequence in allel
 			# 1,2 is: occurency of all aa in sequence in allel - 1,1
@@ -676,6 +675,7 @@ for(allel.num in 1:length(allels)){
 				n_aa_and_h <- length(which(subset_has_allel != aa))
 				n_aa_and_n_h <- length(which(subset_not_has_allel != aa))
         			small.table = matrix(c(aa_and_h, n_aa_and_h, aa_and_n_h, n_aa_and_n_h),nrow=2)
+        			#print (small.table)
 				####BAYES - FACTOR
 				if(!constant_dirichlet_precision_parameter){
 					dirichlet_precision_parameter <- KD(small.table)
@@ -700,6 +700,7 @@ for(allel.num in 1:length(allels)){
 					#print (as.character(subseq(ref_seq, j, j))) 
 	       				p.values <- c(p.values, test.result$p.value)
 	       				#print(test.result$p.value)
+	       				#print(test.result$estimate)
 					if (!is.null(reference_sequence) && !(reference_sequence == "") ){
 						cat((allel.num), "\t", j, "\t", as.character(subseq(ref_seq, j, j)), "\t", (small.table[1,1]), "\t", (small.table[2,1]), "\t", (small.table[1,2]), "\t", (small.table[2,2]), "\t", aacids[k], "\t", test.result$p.value, "\n", file= "logging.csv", append=TRUE)
 					}else{
@@ -747,6 +748,8 @@ for(allel.num in 1:length(allels)){
 				odds.ratio.all <- c(odds.ratio.all, odds.ratio[position])
 				p.values.all.little[position, 2] <- "min"
 			}
+			#print (p.values.all)
+			#print (odds.ratio.all)
 			p.values.all <- rbind(p.values.all, p.values.all.little)
 			####BAYES - FACTOR
 			if (bayes_factor & with_phylogenetic_comparison){	
@@ -755,35 +758,11 @@ for(allel.num in 1:length(allels)){
 				if (p.values.norm[j] <= optical.significance_level && with_phylogenetic_comparison){
 					singleAA <- as.character(subseq(StringSetsequences_p, j, j))
 					seq_number_with_AA <- which(singleAA==aa_values_m[j])
-					seq_number_without_AA <- which(singleAA!=aa_values_m[j])
 					seqs_to_comp <- StringSetsequences_p[seq_number_with_AA]
-					other_seqs <- StringSetsequences_p[seq_number_without_AA]
-          				miny <- min(10, length(seqs_to_comp), length(other_seqs))
-					pre_number_of_cluster <- c()
-          				for (tim in 1:100){
-			  			if (length(seqs_to_comp) > miny){
-			  				seqs_to_comp_sam <- sample(seqs_to_comp, miny)
-			  			}else{
-			  				seqs_to_comp_sam <- seqs_to_comp
-			  			}
-			  			if (length(other_seqs) > miny){
-			  				other_seqs_sam <- sample(other_seqs, miny)
-			  			}else{
-			  				other_seqs_sam <- other_seqs
-			  			}
-			  			labls <- which(labels(dist.vec) %in% names(seqs_to_comp_sam))
-			  			labls_other <- which(labels(dist.vec) %in% names(other_seqs_sam))
-			  			short_one <- as.matrix(dist.vec)[labls,labls]
-			  			large_one <- as.matrix(dist.vec)[labls_other,labls_other]
-						if (is.numeric(offset)){
-							pre_number_of_cluster <- c(pre_number_of_cluster, mean(short_one)+offset < mean(large_one) )
-						}else{
-							pre_number_of_cluster <- c(pre_number_of_cluster, mean(short_one)+sd(short_one)/2 < mean(large_one) )	
-						}
-					}
-          				number_of_cluster <- sum(as.numeric(pre_number_of_cluster))
-					stattest <- c(stattest, as.character(number_of_cluster))
-					cat (number_of_cluster, "\n", file="distances_clust.txt", append=TRUE) 			
+		  			labls <- which(labels(dist.vec) %in% names(seqs_to_comp))
+		  			dist_mut <- as.matrix(dist.vec)[labls,labls]
+					number_of_cluster <- 1-(mean(dist_mut)/mean_dist_all)
+					stattest <- c(stattest, as.character(number_of_cluster))		
 				}
 				else{
 					stattest <- c(stattest, "/")
@@ -828,13 +807,9 @@ if (bayes_factor){
 	all.pvals.corrected.all.all <- lapply(p.values.all.all,function(r){p.adjust(r[,1], method = statistical_correction)})
 }
 
-#print (p.values.all.all)
-#mir <- occ
-
 for(allel.num in 1:length(allels)){
   	if(allels.count[allel.num]>patnum.threshold){
 		#if (allels[allel.num] == "A24"){
-		print (allel.num)
 
 		p.values.all <- p.values.all.all[[allel.num]]
 
@@ -1141,7 +1116,7 @@ if (bayes_factor){
 		}
 		else {	
 			for (i in 1:ncol(result_output)){
-				result <- cbind(result, result_output[,i], scale(result_output[,i],center=TRUE,scale=TRUE)[,1], all_sses[,i], all.aas[,i], all.odds[,1], ref_row)
+				result <- cbind(result, result_output[,i], scale(result_output[,i],center=TRUE,scale=TRUE)[,1], all_sses[,i], all.aas[,i], all.odds[,i], ref_row)
 			}
 		}
 	}else{
@@ -1150,7 +1125,7 @@ if (bayes_factor){
 		}
 		else {	
 			for (i in 1:ncol(result_output)){
-				result <- cbind(result, result_output[,i], scale(result_output[,i],center=TRUE,scale=TRUE)[,1], all_sses[,i], all.aas[,i], all.odds[,1])
+				result <- cbind(result, result_output[,i], scale(result_output[,i],center=TRUE,scale=TRUE)[,1], all_sses[,i], all.aas[,i], all.odds[,i])
 			}
 		}
 	}
@@ -1173,7 +1148,8 @@ if (bayes_factor){
 		}
 		else {	
 			for (i in 1:ncol(result_output)){
-				result <- cbind(result, result_output[,i], all.pvals.c_output[,i], scale(result_output[,i],center=TRUE,scale=TRUE)[,1], all.aas[,i], all.odds[,1], all.stattest[,i], ref_row)
+				result <- cbind(result, result_output[,i], all.pvals.c_output[,i], scale(result_output[,i],center=TRUE,scale=TRUE)[,1], all.aas[,i], all.odds[,i], all.stattest[,i], 
+ref_row)
 			}
 		}
 	}else{
@@ -1182,7 +1158,7 @@ if (bayes_factor){
 		}
 		else {	
 			for (i in 1:ncol(result_output)){
-				result <- cbind(result, result_output[,i], all.pvals.c_output[,i], scale(result_output[,i],center=TRUE,scale=TRUE)[,1], all.aas[,i], all.odds[,1], all.stattest[,i])
+				result <- cbind(result, result_output[,i], all.pvals.c_output[,i], scale(result_output[,i],center=TRUE,scale=TRUE)[,1], all.aas[,i], all.odds[,i], all.stattest[,i])
 			}
 		}
 
@@ -1217,9 +1193,9 @@ return (result)
 
 
 #assocpoint(
-#"../inst/extdata/Example_aa.fasta",
-#"../inst/extdata/Example_epitopes_aa.csv",
-#"../inst/extdata/Example_HLA_binding_motifs_aa.csv",
+#"Input_Assocpoint.fasta",
+#"",
+#"",
 #save_name_pdf = "results.pdf",
 #save_name_csv = "results.csv",
 #dna = FALSE,
@@ -1238,9 +1214,8 @@ return (result)
 #bayes_factor=FALSE,
 #constant_dirichlet_precision_parameter=FALSE,
 #dirichlet_precision_parameter=200,
-#phylo_bias_check = TRUE,
-#offset = FALSE,
-#path_to_file_reference_sequence = "../inst/extdata/Example_reference_aa.fasta",
+#phylo_bias_check = FALSE,
+#path_to_file_reference_sequence = "",
 #one_feature=FALSE,
 #window_size=9,
 #epi_plot=TRUE
