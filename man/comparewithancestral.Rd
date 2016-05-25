@@ -56,7 +56,7 @@
 \examples{
 #Input files
 \dontrun{
-fasta_input <- system.file("extdata", "Example_aa.fasta", package="SeqFeatR")
+fasta_input <- system.file("extdata", "Example_aa_for_cwa.fasta", package="SeqFeatR")
 tree_input <- system.file("extdata", "Example_tree.nh", package="SeqFeatR")
 
 #Usage

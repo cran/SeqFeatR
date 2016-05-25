@@ -1,3 +1,9 @@
+SeqFeatR Version 0.2.3
+======================
+Changes:
+- small change because of new function in package ape with same name as function
+  in Biostrings
+
 SeqFeatR Version 0.2.2
 ======================
 Changes:

@@ -24,10 +24,9 @@ export(
 import(
   tcltk,
   tcltk2,
-  Biostrings,
   plotrix,
   ggplot2,
-  ape,
+  Biostrings,
   R2jags
 )
 
@@ -50,3 +49,13 @@ importFrom("stats", "cutree", "fisher.test", "p.adjust", "rgamma",
 importFrom("utils", "capture.output", "combn", "packageVersion",
              "read.csv2", "read.table", "vignette", "write.csv2",
              "write.table")
+importFrom("ape","read.nexus")
+importFrom("ape","cophenetic.phylo")
+importFrom("ape","subtrees")
+#importFrom("Biostrings","consensusString")
+#importFrom("Biostrings","readAAStringSet")
+#importFrom("Biostrings","stringDist")
+#importFrom("Biostrings","width")
+#importFrom("Biostrings","subseq")
+#importFrom("Biostrings","writeXStringSet")
+#importFrom("Biostrings","AAStringSet")

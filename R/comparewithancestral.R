@@ -10,7 +10,7 @@
 library(Biostrings)
 library(plyr)
 library(plotrix)
-library(ape)
+#library(ape)
 library(phangorn)
 library(qvalue)
 
@@ -393,8 +393,8 @@ inside_main_tr <- function(col){
 create_ancestral_sequences <- function(path_to_file_s){
 	sequences_for_tree <- read.phyDat(path_to_file_s, type="AA", format="fasta")
 	tree <- .GlobalEnv[["tree"]]
-	#print (tree)
-	#print (names(sequences_for_tree))
+	print (tree)
+	print (names(sequences_for_tree))
 	fit = pml(tree, sequences_for_tree)
 	#anc.ml = ancestral.pml(fit, type = "ml")
 	anc.acctran = ancestral.pars(tree, sequences_for_tree, "ACCTRAN")
@@ -594,7 +594,7 @@ HLA_and_tree_inner <- function(path_to_file_s = NULL, path_to_file_t = NULL, sav
 	write.csv2(result_matrix, save_name_csv)
 }
 
-#hlaTree("../inst/extdata/Example_aa.fasta",
+#comparewithancestral("../inst/extdata/Example_aa_for_comparewithancestral.fasta",
 # "../inst/extdata/Example_tree.nh",
 # "test.csv",
 # 1,

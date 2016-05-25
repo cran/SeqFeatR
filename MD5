@@ -1,7 +1,7 @@
-de80f22ceaaee6067112710c3229279a *DESCRIPTION
+96961fdcb937580764a1332c7808f05b *DESCRIPTION
 a287ef9e3924d0860a4aff4c8956e946 *INSTALL
-7e5192975e3d1caa87265abdc86d6144 *NAMESPACE
-ec6acd31933de1a9db714bac0905a87b *NEWS
+27c98a5e82e9bb2274fe685ba5f8e79a *NAMESPACE
+1837533b03375be2a031870b711a3641 *NEWS
 2275af26eb0a77d505507f01222fbdec *R/SeqFeatR_GUI.R
 031b9504d1c182859a5bb68679ffd445 *R/assocpair.R
 6469abf6b0274cf6b47d7c01faa3660b *R/assocpairfeat.R
@@ -9,7 +9,7 @@ ec6acd31933de1a9db714bac0905a87b *NEWS
 831bbe5e520eed68eac12064bcec92ca *R/assocpointhierarchical.R
 8ba7338c5953613e1fd886413aa3196b *R/assocpointpair.R
 6cb2494a1ab0649e886a02d94a0e805e *R/assoctuple.R
-209400ebf91cc97893be45c9d7d3f612 *R/comparewithancestral.R
+37f007a9d0547faae6781db263d1a494 *R/comparewithancestral.R
 65dcf7b9730d431c44b5b2089fc428c8 *R/foundereffectfinder.R
 d7396b94c804f4ba27f799db94081674 *R/getfreqs.R
 5aa549591025604e20784737e72e9ba1 *R/orPlot.R
@@ -22,12 +22,13 @@ d7396b94c804f4ba27f799db94081674 *R/getfreqs.R
 565c4e08e54b0d1f31fb1e278a8ed723 *R/volcanoplot.R
 96d04b1be09e1a787e4173b76a1aee1c *build/vignette.rds
 a3bac48d693856528a00b1cb0ae0749b *inst/doc/SeqFeatR_tutorial.Rnw
-a80441b1ddf159e70627279e1c6fc088 *inst/doc/SeqFeatR_tutorial.pdf
+145bd19a1619c815fbcd3221c343e8b1 *inst/doc/SeqFeatR_tutorial.pdf
 99cc6ea7c4db7a2d5db6670e3d4cc6fa *inst/extdata/Example_Consensus_aa.fasta
 a0caf81f79a709afac8a5bc071227635 *inst/extdata/Example_Consensus_nt.fasta
 ec8d7421e859db84f1d4d3f758020f5b *inst/extdata/Example_HLA_binding_motifs_aa.csv
 64adc3599ef6aab4f5789107b0bc7391 *inst/extdata/Example_HLA_binding_motifs_nt.csv
 dd18d0bafbb892c70befd7bd249f6df8 *inst/extdata/Example_aa.fasta
+73fee40ab356d06378ec67835615ab98 *inst/extdata/Example_aa_for_cwa.fasta
 9b315b8d74e837681126857379a8bd9e *inst/extdata/Example_epitopes_aa.csv
 b12b0f966e203e9d73df3ed2e449ebd2 *inst/extdata/Example_epitopes_nt.csv
 d9d0fcbbdb972bc030636a0812a458cb *inst/extdata/Example_model_for_bayes.txt
@@ -52,7 +53,7 @@ a287690bbf7f1698d909c9862e5a1e9f *man/assocpair.Rd
 d0389aca63222a3d4cdb67d75a12394e *man/assocpointhierarchical.Rd
 d82115eccda9a379400d50300fa0100c *man/assocpointpair.Rd
 303de7059ae2e5c10746df57092e54e3 *man/assoctuple.Rd
-30a19fa87c92f07059f80780d61f050c *man/comparewithancestral.Rd
+1f39f899a3a22df7abb4285a5821a0ce *man/comparewithancestral.Rd
 e632dbe69223f950298eace58319e457 *man/foundereffectfinder.Rd
 95c0efb38d5fc9f9e80bc28a0ad0d3ce *man/getfreqs.Rd
 a23d5d73af80b97bbd70fc353f2f5117 *man/orPlot.Rd
