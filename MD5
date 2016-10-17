@@ -1,7 +1,7 @@
-96961fdcb937580764a1332c7808f05b *DESCRIPTION
+96b9f646791dc6ac8c9b404c3a31f918 *DESCRIPTION
 a287ef9e3924d0860a4aff4c8956e946 *INSTALL
 27c98a5e82e9bb2274fe685ba5f8e79a *NAMESPACE
-1837533b03375be2a031870b711a3641 *NEWS
+55c917e7e03b89cca09e11dd38d3a254 *NEWS
 2275af26eb0a77d505507f01222fbdec *R/SeqFeatR_GUI.R
 031b9504d1c182859a5bb68679ffd445 *R/assocpair.R
 6469abf6b0274cf6b47d7c01faa3660b *R/assocpairfeat.R
@@ -21,8 +21,9 @@ d7396b94c804f4ba27f799db94081674 *R/getfreqs.R
 5c863ab5b1fe917775d624a362997904 *R/visualizepairfeat.R
 565c4e08e54b0d1f31fb1e278a8ed723 *R/volcanoplot.R
 96d04b1be09e1a787e4173b76a1aee1c *build/vignette.rds
+7d47ac238a2134386649118440342d90 *inst/CITATION
 a3bac48d693856528a00b1cb0ae0749b *inst/doc/SeqFeatR_tutorial.Rnw
-145bd19a1619c815fbcd3221c343e8b1 *inst/doc/SeqFeatR_tutorial.pdf
+74f40f1af4ed4d49af4a2378a77494c7 *inst/doc/SeqFeatR_tutorial.pdf
 99cc6ea7c4db7a2d5db6670e3d4cc6fa *inst/extdata/Example_Consensus_aa.fasta
 a0caf81f79a709afac8a5bc071227635 *inst/extdata/Example_Consensus_nt.fasta
 ec8d7421e859db84f1d4d3f758020f5b *inst/extdata/Example_HLA_binding_motifs_aa.csv
