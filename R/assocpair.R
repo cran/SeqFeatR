@@ -201,7 +201,7 @@ make_special_pair_array <- function(){
 make_fisher_test <- function(a,b,c,d){
 	small.table = matrix(c(a,b-a,c-a,d-b-c+a),nrow=2)
 	if(sum(small.table[1,])*sum(small.table[2,])!=0 & (sum(small.table[1,])<=rowsum.threshold | sum(small.table[2,])<=rowsum.threshold))
-	next
+	return (2)
 	#calculate fisher's exact test for each pair (allel, acid)
 	test.result <- fisher.test(small.table)
 	return (test.result$p.value)
@@ -296,6 +296,9 @@ cm_wo_inside_main <- function(col){
 						c <- as.numeric(mini_table[(nrow(mini_table)-1),col])
 						d <- as.numeric(mini_table[(nrow(mini_table)-1),(ncol(mini_table)-1)])
 						p.value <- make_fisher_test(a,b,c,d)
+						if(p.value == 2){
+							next
+						}
 						if (p.value <= thr.sig.fi){
 							f.pos <- i
 							s.pos <- j

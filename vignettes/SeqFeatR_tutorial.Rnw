@@ -22,7 +22,6 @@
 \usepackage{hyperref}
 \usepackage{parskip}
 \usepackage{multirow}
-\usepackage{todonotes}
 \usepackage{color}
 \usepackage{colortbl}
 \definecolor{hellgrau}{rgb}{0.9,0.9,0.9}

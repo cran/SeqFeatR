@@ -165,15 +165,15 @@ make_special_pair_array <- function(){
 }
 
 #for controll and test purpose only!!!!
-make_fisher_test <- function(a,b,c,d){
-	small.table = matrix(c(a,b-a,c-a,d-b-c+a),nrow=2)
-	#print (small.table)
-	if(sum(small.table[1,])*sum(small.table[2,])!=0 & (sum(small.table[1,])<=rowsum.threshold | sum(small.table[2,])<=rowsum.threshold))
-	next
-	#calculate fisher's exact test for each pair (allel, acid)    
-	test.result <- fisher.test(small.table)
-	return (test.result$p.value)
-}
+#make_fisher_test <- function(a,b,c,d){
+#	small.table = matrix(c(a,b-a,c-a,d-b-c+a),nrow=2)
+#	#print (small.table)
+#	if(sum(small.table[1,])*sum(small.table[2,])!=0 & (sum(small.table[1,])<=rowsum.threshold | sum(small.table[2,])<=rowsum.threshold))
+#	next
+#	#calculate fisher's exact test for each pair (allel, acid)    
+#	test.result <- fisher.test(small.table)
+#	return (test.result$p.value)
+#}
 
 
 #main function to call:
