@@ -10,7 +10,7 @@
     save_name_csv, dna = FALSE, 
     patnum_threshold = 1, optical_significance_level = 0.05, 
     star_significance_level = 0.001, A11, A12, A21, A22, B11, B12, B21, 
-    B22, multiple_testing_correction = "bonferroni",
+    B22, C11, C12, C21, C22, has_C=FALSE, multiple_testing_correction = "bonferroni",
     bayes_factor = FALSE, constant_dirichlet_precision_parameter=FALSE,
     dirichlet_precision_parameter=20, phylo_bias_check = FALSE,
     path_to_file_reference_sequence=NULL, one_feature=FALSE,
@@ -39,6 +39,11 @@
   \item{B12}{position of end of first HLA B allele in header line of FASTA file.}
   \item{B21}{position of start of second HLA B allele in header line of FASTA file.}
   \item{B22}{position of end of second HLA B allele in header line of FASTA file.}
+  \item{C11}{position of start of first HLA C allele in header line of FASTA file.}
+  \item{C12}{position of end of first HLA C allele in header line of FASTA file.}
+  \item{C21}{position of start of second HLA C allele in header line of FASTA file.}
+  \item{C22}{position of end of second HLA C allele in header line of FASTA file.}
+  \item{has_C}{set to TRUE if there is a C allel information in header line of FASTA file.}
   \item{multiple_testing_correction}{multiple testing correction applied to p-values. Input can be: "holm",\cr
  "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none".}
   \item{bayes_factor}{if bayes factor should be applied instead of Fisher's exact test for association. See details.}
@@ -83,8 +88,8 @@
 
   Features may be either a single feature, or HLA types, the latter indicated by four blocks in the FASTA
   comment lines. The positions of these blocks in the comment lines are
-  defined by parameters A11, ..., B22. For patients with a homozygous
-  HLA allele the second allele has to be "00" (without the double
+  defined by parameters A11, ..., B22 (..C22 if there is information about the C allel).
+  For patients with a homozygous HLA allele the second allele has to be "00" (without the double
   quotes). For single features (no HLA types), set option one_feature=TRUE. The
   value of the feature (e.g. 'yes / no', or '1 / 2 / 3') should then be
   given at the end of each FASTA comment, separated from the part before
@@ -164,6 +169,11 @@ assocpoint(
 	B12=18,
 	B21=20,
 	B22=21,
+	C11=24,
+	C12=25,
+	C21=27,
+	C22=28,
+	has_C=FALSE,
 	multiple_testing_correction="bonferroni",
 	bayes_factor=FALSE,
 	constant_dirichlet_precision_parameter=TRUE,

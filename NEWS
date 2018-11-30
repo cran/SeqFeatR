@@ -1,3 +1,10 @@
+SeqFeatR Version 0.3
+======================
+Changes:
+- HLA input can now be 4 letter coded
+- HLA input can now include a third definition for HLA (C)
+
+
 SeqFeatR Version 0.2.7
 ======================
 Changes:

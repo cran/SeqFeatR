@@ -152,6 +152,7 @@ ep_wo_set_input_file_known_pos_epi <- structure(function(
 
 #removes "0"s from a string
 remove.zeroes <- function(s){
+	print (substr(s, 1, 1))
 	if(substr(s, 1, 1) == "0")
   		a <- remove.zeroes(substr(s, 2, nchar(s)))  
 	else
@@ -410,6 +411,16 @@ assocpoint <- structure(function(#Find possible epitopes
 	### the position of the start of the second HLA B Allel in the description block of the FASTA file.
 	B22,
 	### the position of the end of the second HLA B Allel in the description block of the FASTA file.
+	C11,
+	### the position of the start of the first HLA C Allel in the description block of the FASTA file.
+	C12,
+	### the position of the start of the second HLA C Allel in the description block of the FASTA file.
+	C21,
+	### the position of the start of the second HLA C Allel in the description block of the FASTA file.
+	C22,
+	### the position of the end of the second HLA C Allel in the description block of the FASTA file.
+	has_C = FALSE,
+	### if there is a C Allel information
 	multiple_testing_correction = "bonferroni",
 	### the statistical correction applied to the p-values. Input can be: "holm", "hochberg", "hommel", "bonferroni", "BH", "BY", "fdr", "none".
 	bayes_factor=FALSE,
@@ -431,7 +442,7 @@ assocpoint <- structure(function(#Find possible epitopes
 	#print (path_to_file_reference_sequence)
 	#print (multiple_testing_correction)
 	#print (path_to_file_m)
-	result <- find_possible_epitopes_inner(path_to_file_sequence_alignment, path_to_file_known_epitopes, path_to_file_binding_motifs, save_name_pdf, save_name_csv, dna, patnum_threshold, optical_significance_level, star_significance_level, optical_significance_level, optical_significance_level, A11, A12, A21, A22, B11, B12, B21, B22, multiple_testing_correction, bayes_factor, constant_dirichlet_precision_parameter, dirichlet_precision_parameter, phylo_bias_check, path_to_file_reference_sequence, one_feature, window_size, epi_plot)
+	result <- find_possible_epitopes_inner(path_to_file_sequence_alignment, path_to_file_known_epitopes, path_to_file_binding_motifs, save_name_pdf, save_name_csv, dna, patnum_threshold, optical_significance_level, star_significance_level, optical_significance_level, optical_significance_level, A11, A12, A21, A22, B11, B12, B21, B22, C11, C12, C21, C22, has_C, multiple_testing_correction, bayes_factor, constant_dirichlet_precision_parameter, dirichlet_precision_parameter, phylo_bias_check, path_to_file_reference_sequence, one_feature, window_size, epi_plot)
 	return(result)
 
 },ex=function(){
@@ -457,6 +468,10 @@ assocpoint <- structure(function(#Find possible epitopes
  30,
  32,
  33,
+ 36,
+ 37,
+ 39,
+ 40,
  "bonferroni",
  FALSE,
  reference_sequence = NULL,
@@ -465,7 +480,7 @@ assocpoint <- structure(function(#Find possible epitopes
  pos_epi_plot=FALSE)
 })
 
-find_possible_epitopes_inner <- function(path_to_file_s = NULL, path_to_file_p = NULL, path_to_file_m = NULL, save_name, save_name_csv, dna = FALSE, patnum.threshold = 1, optical.significance_level = 0.05, star.significance_level = 0.001, pot.epitope_level = 0.05, window_threshold = 0.05, A11, A12, A21, A22, B11, B12, B21, B22, statistical_correction = "bonferroni", bayes_factor, constant_dirichlet_precision_parameter, dirichlet_precision_parameter=20, with_phylogenetic_comparison = FALSE, reference_sequence = NULL, one_ident, window_size, pos_epi_plot=FALSE){
+find_possible_epitopes_inner <- function(path_to_file_s = NULL, path_to_file_p = NULL, path_to_file_m = NULL, save_name, save_name_csv, dna = FALSE, patnum.threshold = 1, optical.significance_level = 0.05, star.significance_level = 0.001, pot.epitope_level = 0.05, window_threshold = 0.05, A11, A12, A21, A22, B11, B12, B21, B22, C11, C12, C21, C22, has_C, statistical_correction = "bonferroni", bayes_factor, constant_dirichlet_precision_parameter, dirichlet_precision_parameter=20, with_phylogenetic_comparison = FALSE, reference_sequence = NULL, one_ident, window_size, pos_epi_plot=FALSE){
 
 	if (!is.null(reference_sequence) && reference_sequence == 0){
 		reference_sequence <- NULL
@@ -536,27 +551,55 @@ if (one_ident){
 	new_sequence_names <- c(new_sequence_names, strsplit(names(sequences)[i], ";")[[1]][2])
 	}
 }else{
-	for(i in 1:length(sequences)){
-	 	#the used values depend on fasta file; they possibly have to be changed - the same holds for the block some lines below
-	  	#allels.all holds all allels from the FASTA files, even duplicates
-	  	#allels holds no duplicates and none which are only a letter, without number (if the type is 00)
-	  	#allels.count counts how often the certain alles is there
-		f <- paste("A", remove.zeroes(substr(names(sequences)[i], A11, A12)), sep="")
-		s <- paste("A", remove.zeroes(substr(names(sequences)[i], A21, A22)), sep="")
-		t <- paste("B", remove.zeroes(substr(names(sequences)[i], B11, B12)), sep="")
-		o <- paste("B", remove.zeroes(substr(names(sequences)[i], B21, B22)), sep="")
-	  	allels.all <- c(allels.all, f, s, t, o)
-		new_sequence_names <- c(new_sequence_names, paste(f, s, t, o))
+	if(has_C){
+		for(i in 1:length(sequences)){
+		 	#the used values depend on fasta file; they possibly have to be changed - the same holds for the block some lines below
+		  	#allels.all holds all allels from the FASTA files, even duplicates
+		  	#allels holds no duplicates and none which are only a letter, without number (if the type is 00)
+		  	#allels.count counts how often the certain alles is there
+			f <- paste("A", remove.zeroes(substr(names(sequences)[i], A11, A12)), sep="")
+			s <- paste("A", remove.zeroes(substr(names(sequences)[i], A21, A22)), sep="")
+			t <- paste("B", remove.zeroes(substr(names(sequences)[i], B11, B12)), sep="")
+			o <- paste("B", remove.zeroes(substr(names(sequences)[i], B21, B22)), sep="")
+			v <- paste("C", remove.zeroes(substr(names(sequences)[i], C11, C12)), sep="")
+			x <- paste("C", remove.zeroes(substr(names(sequences)[i], C21, C22)), sep="")
+		  	allels.all <- c(allels.all, f, s, t, o, v, x)
+			new_sequence_names <- c(new_sequence_names, paste(f, s, t, o, v, x))
+		}
+
+	}else{
+		for(i in 1:length(sequences)){
+		 	#the used values depend on fasta file; they possibly have to be changed - the same holds for the block some lines below
+		  	#allels.all holds all allels from the FASTA files, even duplicates
+		  	#allels holds no duplicates and none which are only a letter, without number (if the type is 00)
+		  	#allels.count counts how often the certain alles is there
+			f <- paste("A", remove.zeroes(substr(names(sequences)[i], A11, A12)), sep="")
+			s <- paste("A", remove.zeroes(substr(names(sequences)[i], A21, A22)), sep="")
+			t <- paste("B", remove.zeroes(substr(names(sequences)[i], B11, B12)), sep="")
+			o <- paste("B", remove.zeroes(substr(names(sequences)[i], B21, B22)), sep="")
+		  	allels.all <- c(allels.all, f, s, t, o)
+			new_sequence_names <- c(new_sequence_names, paste(f, s, t, o))
+		}
+	}
+}
+if(has_C){
+	allels <- sort(unique(allels.all[allels.all!="A" & allels.all!="B" & allels.all!="C"]))
+	
+	#print (allels)
+
+	for(i in 1:length(allels)){
+		allels.count <- c(allels.count, sum(allels.all==allels[i]))
+	}
+}else{
+	allels <- sort(unique(allels.all[allels.all!="A" & allels.all!="B"]))
+	
+	#print (allels)
+
+	for(i in 1:length(allels)){
+		allels.count <- c(allels.count, sum(allels.all==allels[i]))
 	}
 }
 
-allels <- sort(unique(allels.all[allels.all!="A" & allels.all!="B"]))
-
-#print (allels)
-
-for(i in 1:length(allels)){
-  allels.count <- c(allels.count, sum(allels.all==allels[i]))
-}
 
 #possible one letter codes for amino acids B is for amBigious
 #if (!dna){
@@ -1202,14 +1245,19 @@ return (result)
 #patnum_threshold = 1,
 #optical_significance_level = 0.05, 
 #star_significance_level = 0.001,
-#A11 = 16,
-#A12 = 17,
-#A21 = 21,
-#A22 = 22,
-#B11 = 27,
-#B12 = 28,
-#B21 = 32,
-#B22 = 33,
+#A11 = 15,
+#A12 = 18,
+#A21 = 20,
+#A22 = 23,
+#B11 = 26,
+#B12 = 29,
+#B21 = 31,
+#B22 = 34,
+#C11 = 37,
+#C12 = 40,
+#C21 = 42,
+#C22 = 45,
+#has_C = FALSE,
 #multiple_testing_correction = "fdr",
 #bayes_factor=FALSE,
 #constant_dirichlet_precision_parameter=FALSE,
