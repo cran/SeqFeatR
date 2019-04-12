@@ -1,7 +1,7 @@
-426fddc4121d78216b2986ffde303177 *DESCRIPTION
+3f5d5d6ee7733d1dd8897dde22cd4e2d *DESCRIPTION
 a287ef9e3924d0860a4aff4c8956e946 *INSTALL
 27c98a5e82e9bb2274fe685ba5f8e79a *NAMESPACE
-220334797c50cc7f61c129aca256d3c1 *NEWS
+9632ccd0774815e91b16eaeb6741d6aa *NEWS
 63e23e8d807699dcd5711793291c6c7b *R/SeqFeatR_GUI.R
 b56d29b6bb3fc5d10e828116ff94d10f *R/assocpair.R
 ffd781e6cc7a084ec71e839cc39825a3 *R/assocpairfeat.R
@@ -11,8 +11,8 @@ b650de40fdb0906ef9b0980747ec8346 *R/assocpoint.R
 6cb2494a1ab0649e886a02d94a0e805e *R/assoctuple.R
 18ee941d648b4796c964e6464fa4f743 *R/comparewithancestral.R
 65dcf7b9730d431c44b5b2089fc428c8 *R/foundereffectfinder.R
-d7396b94c804f4ba27f799db94081674 *R/getfreqs.R
-5aa549591025604e20784737e72e9ba1 *R/orPlot.R
+c5a63d1eef00f93ccdd725b3285f322b *R/getfreqs.R
+814a2e18b37e31d4dd0380574443365a *R/orPlot.R
 15265a2dafbf2837b6c5c3c9f95ccc79 *R/q-values.R
 1121c063b88c38f24528e1f0d389eea8 *R/rewritetuple.R
 4a96fd376a9f73d5d2710ea47d5f2916 *R/smallmanhattan.R
@@ -20,10 +20,10 @@ d7396b94c804f4ba27f799db94081674 *R/getfreqs.R
 60131169f24367f6f381b7376098ee5d *R/visualizepair.R
 5c863ab5b1fe917775d624a362997904 *R/visualizepairfeat.R
 565c4e08e54b0d1f31fb1e278a8ed723 *R/volcanoplot.R
-b0152795044adbb2bad82a13d8a2a13f *build/vignette.rds
+14a3549458e8043e451a3e90e952ae01 *build/vignette.rds
 6b5e0ed4b0f2bf68157159b14a4d6e56 *inst/CITATION
 e5f3c2304f54dd6409b655b2492ed176 *inst/doc/SeqFeatR_tutorial.Rnw
-974d4b8b6a49e6a5c1b2474fb3818edc *inst/doc/SeqFeatR_tutorial.pdf
+2e44a2ec857ba998c8e3852a0a01b185 *inst/doc/SeqFeatR_tutorial.pdf
 99cc6ea7c4db7a2d5db6670e3d4cc6fa *inst/extdata/Example_Consensus_aa.fasta
 a0caf81f79a709afac8a5bc071227635 *inst/extdata/Example_Consensus_nt.fasta
 ec8d7421e859db84f1d4d3f758020f5b *inst/extdata/Example_HLA_binding_motifs_aa.csv

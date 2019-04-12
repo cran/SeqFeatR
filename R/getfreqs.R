@@ -154,6 +154,7 @@ get_freqs_inner <- function(path_to_file_s, save_csv, save_png, epi_pos_start, e
 	  	#tropismus holds no duplicates and none which are only a letter, without number (if the type is 00)
 	  	#tropismus.count counts how often the certain alles is there
 	  	allels.all <- c(allels.all, strsplit(names(sequences)[i], ";")[[1]][2])
+		new_sequence_names <- names(sequences)
 		}
 	}else{
 		for(i in 1:length(sequences)){
@@ -282,13 +283,13 @@ get_freqs_inner <- function(path_to_file_s, save_csv, save_png, epi_pos_start, e
 	write.csv2(result_matrix, file=save_csv)
 }
 
-#getfreqs("Example_aa.fasta", #<- Deine Fasta
+#getfreqs("TEST.fasta", #<- Deine Fasta
 # "Freqs.csv", 
-#  "Freqs.svg",
+# "Freqs.svg",
 # 1, #<- Kann so bleiben
-# 40, #<- Laenge des Consensus (was ja gleichlang wie dein alignment sein sollte)
-# "Example_Consensus_aa.fasta", # <- Dein Consensus
-# patnum.threshold=1,
+# 30, #<- Laenge des Consensus (was ja gleichlang wie dein alignment sein sollte)
+# "TEST_Consensus_aa.fasta", # <- Dein Consensus
+# patnum_threshold=1,
 # A11 = 10, # <- HLA in Header
 # A12 = 11, # <- HLA in Header
 # A21 = 13, # <- HLA in Header
@@ -297,4 +298,4 @@ get_freqs_inner <- function(path_to_file_s, save_csv, save_png, epi_pos_start, e
 # B12 = 18, # <- HLA in Header
 # B21 = 20, # <- HLA in Header
 # B22 = 21, # <- HLA in Header
-# one_ident = FALSE)
+# one_feature = TRUE)

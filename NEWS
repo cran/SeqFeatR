@@ -1,3 +1,8 @@
+SeqFeatR Version 0.3.1
+======================
+Changes:
+- getfreqs now working with only one feature
+
 SeqFeatR Version 0.3
 ======================
 Changes:

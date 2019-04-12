@@ -76,9 +76,10 @@ create_sequence_graphic_inner <- function(input_file, save_name,seperator, numbe
 	#repeat cases
 	for (k in 1:number_of_cases){
 		head <- colnames(data)[name+frequency]
-		#print (head)
+		print (head)
 		print (odds.position+frequency)
 		odds.ratio <- as.numeric(data[,(odds.position+frequency)])
+		print (data)
 		corrected_p <- as.numeric(data[,(p.value.position+frequency)])
 		AA <- c()
 		colly <- c()
